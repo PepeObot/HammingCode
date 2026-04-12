@@ -1,0 +1,2 @@
+# HammingCode
+Hammingnizing your hammings.
