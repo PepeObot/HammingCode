@@ -1,0 +1,46 @@
+def mostrar_menu():
+    print("=== Menú principal ===")
+    print("1. Mostrar el contenido del archivo")
+    print("2. Pasar el archivo a binario según ASCII")
+    print("3. Salir")
+
+def mostrarArchivo():
+    try:
+        with open("textoA.txt", "r", encoding="utf-8") as archivo:
+            texto = archivo.read()
+            print(f"Contenido del archivo es: {texto}")
+    except FileNotFoundError:
+        print("El archivo no se encontró.")
+
+def enBinario():
+    try:
+        with open("textoA.txt", "rb") as archivo:                #Con "rb" se abre el archivo en modo lectura binaria, lo que permite leer los bytes directamente.
+            contenido = archivo.read()
+        for byte in contenido:
+            if 32<=byte<=126:
+                caracter = chr(byte)
+            else:
+                caracter = "-"
+            print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
+    except FileNotFoundError:
+        print("El archivo no se encontró.")
+
+
+def main():
+    while True:
+        mostrar_menu()
+        eleccion = input("Selecciona una opción: ")
+
+        if eleccion == "1":
+            mostrarArchivo()
+        elif eleccion == "2":
+            enBinario()
+        elif eleccion == "3":
+            print("Hasta luego.")
+            break
+        else:
+            print("Opción no válida. Intenta de nuevo.")
+        print()
+
+if __name__ == "__main__":
+    main()
