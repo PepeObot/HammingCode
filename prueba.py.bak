@@ -30,3 +30,5 @@ def hamminization(n1):
 	return sol 
 
 print("".join(sol))
+
+
