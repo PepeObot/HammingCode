@@ -48,6 +48,105 @@
     <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
   </widget>
+  <widget class="QTableWidget" name="tableFile">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>140</y>
+     <width>1201</width>
+     <height>471</height>
+    </rect>
+   </property>
+   <attribute name="horizontalHeaderCascadingSectionResizes">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="horizontalHeaderDefaultSectionSize">
+    <number>400</number>
+   </attribute>
+   <attribute name="horizontalHeaderHighlightSections">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="horizontalHeaderShowSortIndicator" stdset="0">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="horizontalHeaderStretchLastSection">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="verticalHeaderVisible">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="verticalHeaderCascadingSectionResizes">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="verticalHeaderHighlightSections">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="verticalHeaderStretchLastSection">
+    <bool>false</bool>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>Archivo</string>
+    </property>
+    <property name="font">
+     <font>
+      <bold>false</bold>
+      <stylestrategy>PreferDefault</stylestrategy>
+      <hintingpreference>PreferDefaultHinting</hintingpreference>
+     </font>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Tipo</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Tamaño</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QLabel" name="selectLabel">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>100</y>
+     <width>301</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>15</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Selecciona el archivo a proteger: </string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="protegerFile_btn">
+   <property name="geometry">
+    <rect>
+     <x>500</x>
+     <y>630</y>
+     <width>271</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Proteger Archivo Seleccionado</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

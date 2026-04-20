@@ -16,7 +16,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QLabel, QPushButton, QSizePolicy,
-    QWidget)
+    QTextEdit, QWidget)
 
 class Ui_loadFile(object):
     def setupUi(self, loadFile):
@@ -36,6 +36,22 @@ class Ui_loadFile(object):
         self.label_2.setScaledContents(False)
         self.label_2.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label_2.setWordWrap(False)
+        self.buscarFile_btn = QPushButton(loadFile)
+        self.buscarFile_btn.setObjectName(u"buscarFile_btn")
+        self.buscarFile_btn.setGeometry(QRect(520, 120, 231, 51))
+        font1 = QFont()
+        font1.setBold(True)
+        self.buscarFile_btn.setFont(font1)
+        self.showFile = QTextEdit(loadFile)
+        self.showFile.setObjectName(u"showFile")
+        self.showFile.setGeometry(QRect(90, 250, 1091, 421))
+        self.label = QLabel(loadFile)
+        self.label.setObjectName(u"label")
+        self.label.setGeometry(QRect(110, 210, 241, 41))
+        font2 = QFont()
+        font2.setPointSize(15)
+        font2.setBold(True)
+        self.label.setFont(font2)
 
         self.retranslateUi(loadFile)
 
@@ -46,5 +62,7 @@ class Ui_loadFile(object):
         loadFile.setWindowTitle(QCoreApplication.translate("loadFile", u"Form", None))
         self.back_btn.setText(QCoreApplication.translate("loadFile", u"Volver", None))
         self.label_2.setText(QCoreApplication.translate("loadFile", u"Cargar Archivo", None))
+        self.buscarFile_btn.setText(QCoreApplication.translate("loadFile", u"Buscar Archivo", None))
+        self.label.setText(QCoreApplication.translate("loadFile", u"Contenido del archivo:", None))
     # retranslateUi
 
