@@ -77,8 +77,35 @@ def enBinario():
                     archivo.close()
                 except FileNotFoundError:
                     print("El archivo no se encontró.")
-                #print(l1[0])
-        with open("Archivos/BTrad1024.txt", "w") as arch:
+                #print(l1[0])    
+            case "3": # PARA 16384 BITS.
+                try:
+                    i=0
+                    with open("Archivos/textoC.txt", "rb") as archivo:                #Con "rb" se abre el archivo en modo lectura binaria, lo que permite leer los bytes directamente.
+                        contenido = archivo.read()
+                    for byte in contenido:
+                        if 32<=byte<=126:
+                            caracter = chr(byte)
+                        else:
+                            caracter = "-"
+                        l.append(f"{format(byte,'08b')}")
+                        s_final += l[i]
+                        i+=1
+                        print(i)
+                        print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
+                    x = len(s_final)
+                    n=0
+                    while n <= len(s_final):
+                        if x-n < 0:
+                            l1.append(f"{s_final[n-16384:x]}")
+                            print("ENENETRAAR")
+                            break
+                        l1.append(f"{s_final[n:n+16384]}")
+                        n+=16384
+                    archivo.close()
+                except FileNotFoundError:
+                    print("El archivo no se encontró.")
+        with open("Archivos/BTrad16384.txt", "w") as arch:
             for b in l1:
                 arch.write(p.hamminization(b))
                 arch.write(" ")
