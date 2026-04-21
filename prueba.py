@@ -4,10 +4,12 @@ def hamminization(n1):
 	long = len(n1)
 	p = 0
 
-	while (2**p < len(n1)):
+	while (2**p < len(n1)+p+1):
 		p+=1
-	p+=1
-	trama = [''] * (long + p)
+
+	print(p)
+
+	trama = ['0'] * (long + p)
 
 	j=0
 
@@ -18,7 +20,7 @@ def hamminization(n1):
 
 	for l in range(p):
 		i = (2**l)
-		cont1 = 0
+		#cont1 = 0
 		sum = 0
 		for cont1 in range (long+p):
 			posicion_real = cont1 + 1

@@ -1,0 +1,1 @@
+El concepto de bit es fundamental en la informática. Un bit representa un estado lógico, cero o uno. Al agrupar ocho bits formamos un byte, que es la unidad básica para almacenar caracteres.
