@@ -14,20 +14,27 @@ class EncodeFileController(QWidget):
         self.carpetaArchivos = os.path.join(self.directorioBase, "..", "Archivos")  # Carpeta donde se guardan los archivos
 
         self.fileSelect = None              # Variable para guardar el nombre del archivo que se selecciona de la tabla
-
+        
+        # ---------- SETEOS INICIALES ----------
         # Cargamos la tabla
         try:
             self.tableFile.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)  # Seleccionar fila completa
             self.tableFile.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)    # Selección única
+            self.tableFile.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+            self.tableFile.horizontalHeader().resizeSection(0, 400)
+            self.tableFile.horizontalHeader().resizeSection(1, 150)
             self.tableFile.setRowCount(0)  # Limpiar la tabla antes de cargar los datos
             self.cargarTabla()
-
         except Exception as e:
             QMessageBox.critical(self, "Error", f"No se pudo cargar la tabla: {str(e)}")
+        self.textFile.setReadOnly(True)  # Hacer el QTextEdit de solo lectura
 
-        # Acciones de los botones, los eventos
+        # --------- ACCIONES DE BOTONES Y EVENTOS ---------
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     # Cambia al panel de inicio, el indice 0 es el panel_inicio
         self.protegerFile_btn.clicked.connect(lambda: self.obtenerArchivoSeleccionado())
+        self.tableFile.itemSelectionChanged.connect(self.mostrarArchivo)
+
+
 
     def cargarTabla(self):
         if os.path.exists(self.carpetaArchivos):
@@ -50,9 +57,27 @@ class EncodeFileController(QWidget):
                     rowPosition = self.tableFile.rowCount()
                     self.tableFile.insertRow(rowPosition)
                     self.tableFile.setItem(rowPosition, 0, QTableWidgetItem(f))             # Nombre
-                    self.tableFile.setItem(rowPosition, 1, QTableWidgetItem(tipo))          # Tipo
-                    self.tableFile.setItem(rowPosition, 2, QTableWidgetItem(tamaño_str))    # Tamaño
+                    self.tableFile.setItem(rowPosition, 1, QTableWidgetItem(tamaño_str))    # Tamaño
     
+    def mostrarArchivo(self):
+        seleccion = self.tableFile.selectedItems()
+        if not seleccion:
+            return
+        fila = seleccion[0].row()
+        nombre_archivo = self.tableFile.item(fila, 0).text()
+        directorio_actual = os.path.dirname(os.path.abspath(__file__))
+        rutaFile = os.path.join(directorio_actual, "..", "Archivos", nombre_archivo)
+        try:
+            if os.path.exists(rutaFile):
+                with open(rutaFile, 'r', encoding='utf-8') as f:
+                    contenido = f.read()
+                    self.textFile.setPlainText(contenido)
+            else:
+                self.textFile.setPlainText("Error: El archivo no existe en la ruta especificada.")
+        except Exception as e:
+            self.textFile.setPlainText(f"No se pudo leer el archivo: {str(e)}")
+            
+
     def obtenerArchivoSeleccionado(self):
         selected_rows = self.tableFile.selectionModel().selectedRows()
         if selected_rows:

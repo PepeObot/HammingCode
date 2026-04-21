@@ -16,7 +16,8 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QHeaderView, QLabel, QPushButton,
-    QSizePolicy, QTableWidget, QTableWidgetItem, QWidget)
+    QSizePolicy, QTableWidget, QTableWidgetItem, QTextEdit,
+    QWidget)
 
 class Ui_encodeFile(object):
     def setupUi(self, encodeFile):
@@ -35,8 +36,8 @@ class Ui_encodeFile(object):
         self.tituloLabel.setFont(font)
         self.tituloLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.tableFile = QTableWidget(encodeFile)
-        if (self.tableFile.columnCount() < 3):
-            self.tableFile.setColumnCount(3)
+        if (self.tableFile.columnCount() < 2):
+            self.tableFile.setColumnCount(2)
         font1 = QFont()
         font1.setBold(False)
         font1.setStyleStrategy(QFont.PreferDefault)
@@ -46,15 +47,13 @@ class Ui_encodeFile(object):
         self.tableFile.setHorizontalHeaderItem(0, __qtablewidgetitem)
         __qtablewidgetitem1 = QTableWidgetItem()
         self.tableFile.setHorizontalHeaderItem(1, __qtablewidgetitem1)
-        __qtablewidgetitem2 = QTableWidgetItem()
-        self.tableFile.setHorizontalHeaderItem(2, __qtablewidgetitem2)
         self.tableFile.setObjectName(u"tableFile")
-        self.tableFile.setGeometry(QRect(40, 140, 1201, 471))
+        self.tableFile.setGeometry(QRect(40, 140, 570, 471))
         self.tableFile.horizontalHeader().setCascadingSectionResizes(False)
-        self.tableFile.horizontalHeader().setDefaultSectionSize(400)
+        self.tableFile.horizontalHeader().setDefaultSectionSize(300)
         self.tableFile.horizontalHeader().setHighlightSections(True)
         self.tableFile.horizontalHeader().setProperty(u"showSortIndicator", False)
-        self.tableFile.horizontalHeader().setStretchLastSection(True)
+        self.tableFile.horizontalHeader().setStretchLastSection(False)
         self.tableFile.verticalHeader().setVisible(True)
         self.tableFile.verticalHeader().setCascadingSectionResizes(False)
         self.tableFile.verticalHeader().setHighlightSections(True)
@@ -73,6 +72,13 @@ class Ui_encodeFile(object):
         font3.setPointSize(12)
         font3.setBold(True)
         self.protegerFile_btn.setFont(font3)
+        self.textFile = QTextEdit(encodeFile)
+        self.textFile.setObjectName(u"textFile")
+        self.textFile.setGeometry(QRect(660, 140, 571, 471))
+        self.selectLabel_2 = QLabel(encodeFile)
+        self.selectLabel_2.setObjectName(u"selectLabel_2")
+        self.selectLabel_2.setGeometry(QRect(680, 100, 301, 41))
+        self.selectLabel_2.setFont(font2)
 
         self.retranslateUi(encodeFile)
 
@@ -86,10 +92,9 @@ class Ui_encodeFile(object):
         ___qtablewidgetitem = self.tableFile.horizontalHeaderItem(0)
         ___qtablewidgetitem.setText(QCoreApplication.translate("encodeFile", u"Archivo", None))
         ___qtablewidgetitem1 = self.tableFile.horizontalHeaderItem(1)
-        ___qtablewidgetitem1.setText(QCoreApplication.translate("encodeFile", u"Tipo", None))
-        ___qtablewidgetitem2 = self.tableFile.horizontalHeaderItem(2)
-        ___qtablewidgetitem2.setText(QCoreApplication.translate("encodeFile", u"Tama\u00f1o", None))
+        ___qtablewidgetitem1.setText(QCoreApplication.translate("encodeFile", u"Tama\u00f1o", None))
         self.selectLabel.setText(QCoreApplication.translate("encodeFile", u"Selecciona el archivo a proteger: ", None))
         self.protegerFile_btn.setText(QCoreApplication.translate("encodeFile", u"Proteger Archivo Seleccionado", None))
+        self.selectLabel_2.setText(QCoreApplication.translate("encodeFile", u"Archivo Seleccionado:", None))
     # retranslateUi
 
