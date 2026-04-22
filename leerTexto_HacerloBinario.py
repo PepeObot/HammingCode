@@ -31,7 +31,6 @@ def enBinario():
         eleccion = input("Elija tamaño para la Hamminization Machine ")
         match eleccion :
             case "1": #ESTO ES PARA 8 BITS.
-                print("HOLA?")
                 try:
                     with open("Archivos/textoD.txt", "rb") as archivo:                #Con "rb" se abre el archivo en modo lectura binaria, lo que permite leer los bytes directamente.
                         contenido = archivo.read()
@@ -63,21 +62,18 @@ def enBinario():
                         l.append(f"{format(byte,'08b')}")
                         s_final += l[i]
                         i+=1
-                        print(i)
                         print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
                     x = len(s_final)
                     n=0
                     while n <= len(s_final):
                         if x-n < 0:
                             l1.append(f"{s_final[n-1024:x]}")
-                            print("ENENETRAAR")
                             break
                         l1.append(f"{s_final[n:n+1024]}")
                         n+=1024
                     archivo.close()
                 except FileNotFoundError:
                     print("El archivo no se encontró.")
-                #print(l1[0])    
             case "3": # PARA 16384 BITS.
                 try:
                     i=0
@@ -98,7 +94,6 @@ def enBinario():
                     while n <= len(s_final):
                         if x-n < 0:
                             l1.append(f"{s_final[n-16384:x]}")
-                            print("ENENETRAAR")
                             break
                         l1.append(f"{s_final[n:n+16384]}")
                         n+=16384

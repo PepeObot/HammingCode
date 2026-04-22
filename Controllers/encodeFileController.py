@@ -94,3 +94,50 @@ class EncodeFileController(QWidget):
     
     def cambiarPanel (self, indice):
         self.mainWindow.cambiar_pantalla(indice)
+
+    def hamming_8(self):
+        l = []
+        try:
+            with open(os.path.join(self.carpetaArchivos,self.fileSelect),'r',encoding='utf-8')as archivo:
+                # PASAR A BITS
+                contenido = archivo.read()
+                for byte in contenido:
+                    if 32<=byte<=126:
+                        caracter = chr(byte)
+                    else:
+                        caracter = "-"
+                    l.append(f"{format(byte,'08b')}")
+                    #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
+                archivo.close()
+        except FileNotFoundError:
+            print("Nada acá")
+        with open(os.path.join(self.carpetaArchivos,"BTrad.txt"),'w') as f:
+            for b in l:
+                f.write(self.hamminization(b))
+                f.write(" ")
+        f.close
+
+    def hamminization(n1):
+        long = len(n1)
+        p = 0
+
+        while (2**p < len(n1)+p+1):
+            p+=1
+            trama = ['0'] * (long + p)
+            j=0
+            for i in range(1, long+p+1):
+                if(i & (i-1)) != 0:
+                    trama[i-1] = n1[j]
+                    j+=1
+            for l in range(p):
+                i = (2**l)
+                #cont1 = 0
+                sum = 0
+                for cont1 in range (long+p):                        
+                    posicion_real = cont1 + 1
+                    if(posicion_real & i) != 0:
+                        if posicion_real!=i:
+                            sum = sum ^ int(trama[cont1])	
+            trama[i-1] = str(sum)
+            sol = "".join(trama)
+        
