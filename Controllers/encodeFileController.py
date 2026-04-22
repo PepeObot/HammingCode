@@ -33,6 +33,10 @@ class EncodeFileController(QWidget):
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     # Cambia al panel de inicio, el indice 0 es el panel_inicio
         self.protegerFile_btn.clicked.connect(lambda: self.obtenerArchivoSeleccionado())
         self.tableFile.itemSelectionChanged.connect(self.mostrarArchivo)
+        #self.protegerFile8_btn.clicked.connect("funcion")
+        #self.protegerFile1024_btn.clicked.connect("funcion")
+        #self.protegerFile16384_btn.clicked.connect("funcion")
+
 
 
 

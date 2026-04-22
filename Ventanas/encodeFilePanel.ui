@@ -123,12 +123,12 @@
     <string>Selecciona el archivo a proteger: </string>
    </property>
   </widget>
-  <widget class="QPushButton" name="protegerFile_btn">
+  <widget class="QPushButton" name="protegerFile1024_btn">
    <property name="geometry">
     <rect>
-     <x>500</x>
+     <x>490</x>
      <y>630</y>
-     <width>271</width>
+     <width>291</width>
      <height>51</height>
     </rect>
    </property>
@@ -139,7 +139,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Proteger Archivo Seleccionado</string>
+    <string>Proteger Archivo (Bloque 1024)</string>
    </property>
   </widget>
   <widget class="QTextEdit" name="textFile">
@@ -168,6 +168,44 @@
    </property>
    <property name="text">
     <string>Archivo Seleccionado:</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="protegerFile8_btn">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>630</y>
+     <width>291</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Proteger Archivo (Bloque 8)</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="protegerFile16384_btn">
+   <property name="geometry">
+    <rect>
+     <x>890</x>
+     <y>630</y>
+     <width>291</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>12</pointsize>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Proteger Archivo (Bloque 16384)</string>
    </property>
   </widget>
  </widget>
