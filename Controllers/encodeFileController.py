@@ -123,29 +123,30 @@ class EncodeFileController(QWidget):
         l = []
         l1 = []
         i = 0
+        s_final1 = None
         self.fileSelect = self.obtenerArchivoSeleccionado()
         try:
             with open(os.path.join(self.carpetaArchivos,self.fileSelect),'rb')as archivo:
                 # PASAR A BITS
                 contenido = archivo.read()
-                for byte in contenido:
-                    if 32<=byte<=126:
-                        caracter = chr(byte)
-                    else:
-                        caracter = "-"
-                    l.append(f"{format(byte,'08b')}")
-                    s_final += l[i]
-                    i+=1
-                    #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
-                x = len(s_final)
-                n = 0
-                while n <= len(s_final):
-                        if x-n < 0:
-                            l1.append(f"{s_final[n-1024:x]}")
-                            break
-                        l1.append(f"{s_final[n:n+1024]}")
-                        n+=1024 
-                archivo.close()
+            for byte in contenido:
+                if 32<=byte<=126:
+                    caracter = chr(byte)
+                else:
+                    caracter = "-"
+                l.append(f"{format(byte,'08b')}")
+                s_final1 += l[i]
+                i+=1
+                #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
+            x = len(s_final1)
+            n = 0
+            while n <= len(s_final1):
+                    if x-n < 0:
+                        l1.append(f"{s_final1[n-1024:x]}")
+                        break
+                    l1.append(f"{s_final1[n:n+1024]}")
+                    n+=1024 
+            archivo.close()
         except FileNotFoundError:
             print("Nada acá")
         with open(os.path.join(self.carpetaArchivos,"BTrad1024.txt"),'w') as f:
@@ -159,29 +160,30 @@ class EncodeFileController(QWidget):
         l = []
         l1 = []
         i = 0
+        s_final = ""
         self.fileSelect = self.obtenerArchivoSeleccionado()
         try:
             with open(os.path.join(self.carpetaArchivos,self.fileSelect),'rb')as archivo:
                 # PASAR A BITS
                 contenido = archivo.read()
-                for byte in contenido:
-                    if 32<=byte<=126:
+            for byte in contenido:
+                if 32<=byte<=126:
                         caracter = chr(byte)
-                    else:
+                else:
                         caracter = "-"
-                    l.append(f"{format(byte,'08b')}")
-                    s_final += l[i]
-                    i+=1
-                    #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
-                x = len(s_final)
-                n = 0
-                while n <= len(s_final):
-                        if x-n < 0:
-                            l1.append(f"{s_final[n-16384:x]}")
-                            break
-                        l1.append(f"{s_final[n:n+16384]}")
-                        n+=16384
-                archivo.close()
+                l.append(f"{format(byte,'08b')}")
+                s_final += l[i]
+                i+=1
+                #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
+            x = len(s_final)
+            n = 0
+            while n <= len(s_final):
+                    if x-n < 0:
+                        l1.append(f"{s_final[n-16384:x]}")
+                        break
+                    l1.append(f"{s_final[n:n+16384]}")
+                    n+=16384
+            archivo.close()
         except FileNotFoundError:
             print("Nada acá")
         with open(os.path.join(self.carpetaArchivos,"BTrad16384.txt"),'w') as f:
