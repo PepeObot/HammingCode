@@ -34,8 +34,8 @@ class EncodeFileController(QWidget):
         #self.protegerFile_btn.clicked.connect(lambda: self.obtenerArchivoSeleccionado())
         self.tableFile.itemSelectionChanged.connect(self.mostrarArchivo)
         self.protegerFile8_btn.clicked.connect(self.hamming_8)
-        self.protegerFile1024_btn.clicked.connect(self.hamming_1024)
-        self.protegerFile16384_btn.clicked.connect(self.hamming_16384)
+        #self.protegerFile1024_btn.clicked.connect(self.hamming_1024)
+        #self.protegerFile16384_btn.clicked.connect(self.hamming_16384)
 
 
 
@@ -114,7 +114,7 @@ class EncodeFileController(QWidget):
             print("Nada acá")
         with open(os.path.join(self.carpetaArchivos,"BTrad.txt"),'w') as f:
             for b in l:
-                x = self.hamminization(b)
+                x = self.hamminization8(b)
                 f.write(x)
                 f.write(" ")
         f.close
@@ -151,6 +151,11 @@ class EncodeFileController(QWidget):
             print("Nada acá")
         with open(os.path.join(self.carpetaArchivos,"BTrad1024.txt"),'w') as f:
             for b in l1:
+                """
+
+                ACA VA EL HAMMING DE MOD 1024 NO PARA MOD 8
+                
+                """
                 x = self.hamminization(b)
                 f.write(x)
                 f.write(" ")
@@ -188,32 +193,77 @@ class EncodeFileController(QWidget):
             print("Nada acá")
         with open(os.path.join(self.carpetaArchivos,"BTrad16384.txt"),'w') as f:
             for b in l1:
-                x = self.hamminization(b)
+                """
+
+                ACA VA EL HAMMING DE MOD 16384 NO PARA MOD 8
+                
+                """
+                #x = self.hamminization(b)
                 f.write(x)
                 f.write(" ")
         f.close
 
-    def hamminization(self, n1):
+
+    """
+    FALTA ARMAR HAMMING PARA MOD 1024 y 16384. HACER!
+    """
+
+
+    def hamminization8(self, n1):
         long = len(n1)
         p = 0
-
+        
         while (2**p < len(n1)+p+1):
             p+=1
-            trama = ['0'] * (long + p)
-            j=0
-            for i in range(1, long+p+1):
-                if(i & (i-1)) != 0:
-                    trama[i-1] = n1[j]
-                    j+=1
-            for l in range(p):
-                i = (2**l)
-                #cont1 = 0
-                sum = 0
-                for cont1 in range (long+p):                        
-                    posicion_real = cont1 + 1
-                    if(posicion_real & i) != 0:
-                        if posicion_real!=i:
-                            sum = sum ^ int(trama[cont1])	
+
+        trama1 = ['0'] * (long)
+        trama = ['0'] * (long)
+
+        j=0
+
+        for i in range(1, long):
+            if((i & (i-1)) != 0 ):
+                trama[i-1] = n1[j]
+                j+=1
+
+
+        for i in range(1,long):
+            if ((i&(i-1))!=0):
+                trama1[i-1] = n1[j]
+                j+=1
+
+        for l in range(p):
+            i = (2**l)
+            sum = 0
+            sum1 = 0
+            for cont1 in range (long):
+                posicion_real = cont1 + 1
+                if(posicion_real & i) != 0:
+                    if posicion_real!=i:
+                        sum = sum ^ int(trama[cont1])
+                        sum1 = sum1 ^ int(trama1[cont1])	
             trama[i-1] = str(sum)
-            sol = "".join(trama)
-        return sol
+            trama1[i-1] = str(sum1)
+
+        sum = 0
+        sum1 = 0
+
+        while l < len(trama):
+            sum += int(trama[l]) 
+            sum1 += int(trama1[l])
+            l+=1
+
+        if sum%2 == 0:
+            trama[len(trama)-1] = "1"
+        else:
+            trama[len(trama)-1] = "0"
+
+        if sum1%2 == 0:
+            trama1[len(trama1)-1] = "1"
+        else:
+            trama1[len(trama1)-1] = "0"
+
+        sol = "".join(trama)
+        sol += "".join(trama1)
+
+        return sol 
