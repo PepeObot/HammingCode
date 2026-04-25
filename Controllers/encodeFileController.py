@@ -1,7 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QMessageBox, QTableWidgetItem, QFileDialog, QTableWidget
+from PyQt6.QtWidgets import QWidget, QMessageBox, QTableWidgetItem, QTableWidget
 from PyQt6 import uic
 import os
-import shutil
 
 class EncodeFileController(QWidget):
     def __init__(self, main_window):
@@ -15,30 +14,38 @@ class EncodeFileController(QWidget):
 
         self.fileSelect = None              # Variable para guardar el nombre del archivo que se selecciona de la tabla
         
-        # ---------- SETEOS INICIALES ----------
+        # ---------- SETEOS INICIALES ---------------------------------------------------------------------------------------------------------
         # Cargamos la tabla
         try:
-            self.tableFile.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)  # Seleccionar fila completa
-            self.tableFile.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)    # Selección única
-            self.tableFile.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
+            self.tableFile.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)  # Para que se selecciones la fila completa
+            self.tableFile.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)    # Para que permita seleccionar una fila a la vez
+            self.tableFile.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)      # Para que no permita editar las celdas
             self.tableFile.horizontalHeader().resizeSection(0, 400)
             self.tableFile.horizontalHeader().resizeSection(1, 150)
             self.tableFile.setRowCount(0)  # Limpiar la tabla antes de cargar los datos
             self.cargarTabla()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"No se pudo cargar la tabla: {str(e)}")
+
         self.textFile.setReadOnly(True)  # Hacer el QTextEdit de solo lectura
 
-        # --------- ACCIONES DE BOTONES Y EVENTOS ---------
+
+        # --------- ACCIONES DE BOTONES Y EVENTOS ---------------------------------------------------------------------------------------------
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     # Cambia al panel de inicio, el indice 0 es el panel_inicio
-        #self.protegerFile_btn.clicked.connect(lambda: self.obtenerArchivoSeleccionado())
-        self.tableFile.itemSelectionChanged.connect(self.mostrarArchivo)
+        self.tableFile.itemSelectionChanged.connect(self.mostrarArchivo)    # Muestra el contenido del archivo seleccionado en el QTextEdit
         self.protegerFile8_btn.clicked.connect(self.hamming_8)
         #self.protegerFile1024_btn.clicked.connect(self.hamming_1024)
         #self.protegerFile16384_btn.clicked.connect(self.hamming_16384)
 
 
+    def refrescarPanel(self):
+        self.tableFile.setRowCount(0)
+        self.cargarTabla()
+        self.textFile.clear()
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.refrescarPanel()
 
     def cargarTabla(self):
         if os.path.exists(self.carpetaArchivos):
@@ -46,8 +53,7 @@ class EncodeFileController(QWidget):
             for f in files:
                 file_path = os.path.join(self.carpetaArchivos, f)   # Ruta completa del archivo f
                 if os.path.isfile(file_path):  # Pregunta si f es un archivo (y no una carpeta)
-                    # Obtenemos el tipo y el tamaño de f
-                    tipo = os.path.splitext(f)[1] if os.path.splitext(f)[1] else "Sin extensión"
+                    # Obtenemos el tamaño de f
                     tamaño = os.path.getsize(file_path)
 
                     # Convertir tamaño a formato B, KB o MB
@@ -58,6 +64,7 @@ class EncodeFileController(QWidget):
                     else:
                         tamaño_str = f"{tamaño / (1024 * 1024):.2f} MB"
                     
+                    # Agregamos el archivo a la tabla
                     rowPosition = self.tableFile.rowCount()
                     self.tableFile.insertRow(rowPosition)
                     self.tableFile.setItem(rowPosition, 0, QTableWidgetItem(f))             # Nombre
@@ -80,7 +87,6 @@ class EncodeFileController(QWidget):
                 self.textFile.setPlainText("Error: El archivo no existe en la ruta especificada.")
         except Exception as e:
             self.textFile.setPlainText(f"No se pudo leer el archivo: {str(e)}")
-            
 
     def obtenerArchivoSeleccionado(self):
         selected_rows = self.tableFile.selectionModel().selectedRows()
@@ -91,13 +97,13 @@ class EncodeFileController(QWidget):
         else:
             return None
 
-    
     def cambiarPanel (self, indice):
         self.mainWindow.cambiar_pantalla(indice)
 
     def hamming_8(self):
         l = []
         self.fileSelect = self.obtenerArchivoSeleccionado()
+        baseFile = os.path.splitext(self.fileSelect)[0]  # Obtener el nombre del archivo, sin la extensión
         try:
             with open(os.path.join(self.carpetaArchivos,self.fileSelect),'rb')as archivo:
                 # PASAR A BITS
@@ -109,15 +115,17 @@ class EncodeFileController(QWidget):
                         caracter = "-"
                     l.append(f"{format(byte,'08b')}")
                     #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
-                archivo.close()
+            # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
+            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA1"),'w') as f:
+                for b in l:
+                    x = self.hamminization8(b)
+                    f.write(x)
+                    f.write(" ")
+            # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
+            QMessageBox.information(self, "Éxito", f"Archivo protegido con Hamming (mod 8) correctamente. \nGuardado en '{baseFile}.HA1'.")
+            self.refrescarPanel()
         except FileNotFoundError:
-            print("Nada acá")
-        with open(os.path.join(self.carpetaArchivos,"BTrad.txt"),'w') as f:
-            for b in l:
-                x = self.hamminization8(b)
-                f.write(x)
-                f.write(" ")
-        f.close
+            QMessageBox.critical(self, "Error", "No se pudo encontrar el archivo seleccionado.")
 
     def hamming_1024(self):
         l = []
@@ -146,20 +154,23 @@ class EncodeFileController(QWidget):
                         break
                     l1.append(f"{s_final1[n:n+1024]}")
                     n+=1024 
-            archivo.close()
-        except FileNotFoundError:
-            print("Nada acá")
-        with open(os.path.join(self.carpetaArchivos,"BTrad1024.txt"),'w') as f:
-            for b in l1:
-                """
+            # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
+            with open(os.path.join(self.carpetaArchivos,"BTrad1024.txt"),'w') as f:
+                for b in l1:
+                    """
 
-                ACA VA EL HAMMING DE MOD 1024 NO PARA MOD 8
-                
-                """
-                x = self.hamminization(b)
-                f.write(x)
-                f.write(" ")
-        f.close
+                    ACA VA EL HAMMING DE MOD 1024 NO PARA MOD 8
+                    
+                    """
+                    x = self.hamminization(b)
+                    f.write(x)
+                    f.write(" ")
+            # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
+            QMessageBox.information(self, "Éxito", "Archivo protegido con Hamming (mod 1024) correctamente. Guardado en 'BTrad1024.txt'.")
+            self.refrescarPanel()
+
+        except FileNotFoundError:
+            QMessageBox.critical(self, "Error", "No se pudo encontrar el archivo seleccionado.")
 
     def hamming_16384(self):
         l = []
@@ -188,21 +199,23 @@ class EncodeFileController(QWidget):
                         break
                     l1.append(f"{s_final[n:n+16384]}")
                     n+=16384
-            archivo.close()
+            # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
+            with open(os.path.join(self.carpetaArchivos,"BTrad16384.txt"),'w') as f:
+                for b in l1:
+                    """
+
+                    ACA VA EL HAMMING DE MOD 16384 NO PARA MOD 8
+                    
+                    """
+                    #x = self.hamminization(b)
+                    f.write(x)
+                    f.write(" ")
+            # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
+            QMessageBox.information(self, "Éxito", "Archivo protegido con Hamming (mod 16384) correctamente. Guardado en 'BTrad16384.txt'.")
+            self.refrescarPanel()
+
         except FileNotFoundError:
-            print("Nada acá")
-        with open(os.path.join(self.carpetaArchivos,"BTrad16384.txt"),'w') as f:
-            for b in l1:
-                """
-
-                ACA VA EL HAMMING DE MOD 16384 NO PARA MOD 8
-                
-                """
-                #x = self.hamminization(b)
-                f.write(x)
-                f.write(" ")
-        f.close
-
+            QMessageBox.critical(self, "Error", "No se pudo encontrar el archivo seleccionado.")
 
     """
     FALTA ARMAR HAMMING PARA MOD 1024 y 16384. HACER!
