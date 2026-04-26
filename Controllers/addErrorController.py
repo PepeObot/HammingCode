@@ -1,5 +1,8 @@
+from sys import exception
+
 from PyQt6.QtWidgets import QWidget, QMessageBox, QTableWidgetItem, QTableWidget
 from PyQt6 import uic
+import random
 import os
 
 class AddErrorController(QWidget):
@@ -28,6 +31,7 @@ class AddErrorController(QWidget):
         self.loadHA1_btn.clicked.connect(self.cargarArchivosHA1)  # Carga los archivos tipo HA1 en la tabla
         self.loadHA2_btn.clicked.connect(self.cargarArchivosHA2)  # Carga los archivos tipo HA2 en la tabla
         self.loadHA3_btn.clicked.connect(self.cargarArchivosHA3)  # Carga los archivos tipo HA3 en la tabla
+        self.addError_btn.clicked.connect(self.insertarError)
         self.tableFile.itemSelectionChanged.connect(self.mostrarArchivo)    # Muestra el contenido del archivo seleccionado en el QTextEdit
 
 
@@ -163,4 +167,52 @@ class AddErrorController(QWidget):
         except Exception as e:
             self.textFile.setPlainText(f"No se pudo leer el archivo: {str(e)}")
     
-    #def insertarError(self):
+    def insertarError(self):
+        seleccion = self.tableFile.selectedItems()
+        if not seleccion:
+            QMessageBox.warning(self, "Aviso", "No se ha seleccionado ningun archivo.")
+            return
+        fila = seleccion[0].row()
+        nombre_archivo = self.tableFile.item(fila, 0).text()
+
+        directorio_actual = os.path.dirname(os.path.abspath(__file__))
+        rutaFile = os.path.join(directorio_actual, "..", "Archivos", nombre_archivo)
+        
+        try:
+            with open(rutaFile, "r") as archivo:
+                contenido = archivo.read()
+            
+            # Separamos el contenido en bloques usando los espacios
+            bloques = contenido.split()
+            bloques_procesados = []
+
+            for bloque_texto in bloques:
+                # Convertimos el string en lista para poder modificar un carácter específico
+                lista_bits = list(bloque_texto)
+                
+                # Probabilidad de que se inserte un error en el bloque
+                if random.random() < 0.2:
+                    # Elegimos la posicion a modificar
+                    posError = random.randint(0, len(lista_bits) - 1)
+                    
+                    # Invertimos el bit de la posicion elegida
+                    bit_actual = lista_bits[posError]
+                    if bit_actual == '0':
+                        lista_bits[posError] = '1'
+                    else:
+                        lista_bits[posError] = '0'
+                
+                # Pasamos el bloque nuevamente a string y lo agregamos a la lista de bloques procesados
+                bloques_procesados.append("".join(lista_bits))
+            
+            # Guardamos el resultado final en un archivo .HE1
+            resultado = " ".join(bloques_procesados)
+            archivoFinal = os.path.splitext(rutaFile)[0] + ".HE1"
+            with open(archivoFinal, "w") as archivo_salida:
+                archivo_salida.write(resultado)
+            QMessageBox.information(self, "Éxito", f"Inserción de error completada. \nArchivo guardado como: {os.path.basename(archivoFinal)}")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"No se pudo procesar el archivo")
+         
+
+

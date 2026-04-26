@@ -117,10 +117,12 @@ class EncodeFileController(QWidget):
                     #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
             with open(os.path.join(self.carpetaArchivos, baseFile + ".HA1"),'w') as f:
-                for b in l:
-                    x = self.hamminization8(b)
-                    f.write(x)
-                    f.write(" ")
+                bloques = [self.hamminization8(b) for b in l]
+                f.write(" ".join(bloques))
+                # for b in l:
+                #     x = self.hamminization8(b)
+                #     f.write(x)
+                #     f.write(" ")
             # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
             QMessageBox.information(self, "Éxito", f"Archivo protegido con Hamming (mod 8) correctamente. \nGuardado en '{baseFile}.HA1'.")
             self.refrescarPanel()
