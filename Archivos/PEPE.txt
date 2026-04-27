@@ -1,0 +1,2 @@
+El concepto de bit es fundamental en la informatica. Un bit representa un estado logico, cero o uno. Al agrupar ocho bits form
+

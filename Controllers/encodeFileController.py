@@ -34,8 +34,8 @@ class EncodeFileController(QWidget):
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     # Cambia al panel de inicio, el indice 0 es el panel_inicio
         self.tableFile.itemSelectionChanged.connect(self.mostrarArchivo)    # Muestra el contenido del archivo seleccionado en el QTextEdit
         self.protegerFile8_btn.clicked.connect(self.hamming_8)
-        #self.protegerFile1024_btn.clicked.connect(self.hamming_1024)
-        #self.protegerFile16384_btn.clicked.connect(self.hamming_16384)
+        self.protegerFile1024_btn.clicked.connect(self.hamming_1024)
+        self.protegerFile16384_btn.clicked.connect(self.hamming_16384)
 
 
     def refrescarPanel(self):
@@ -109,10 +109,6 @@ class EncodeFileController(QWidget):
                 # PASAR A BITS
                 contenido = archivo.read()
                 for byte in contenido:
-                    if 32<=byte<=126:
-                        caracter = chr(byte)
-                    else:
-                        caracter = "-"
                     l.append(f"{format(byte,'08b')}")
                     #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
@@ -133,40 +129,33 @@ class EncodeFileController(QWidget):
         l = []
         l1 = []
         i = 0
-        s_final1 = None
+        s_final1 = ""
         self.fileSelect = self.obtenerArchivoSeleccionado()
         try:
             with open(os.path.join(self.carpetaArchivos,self.fileSelect),'rb')as archivo:
                 # PASAR A BITS
                 contenido = archivo.read()
             for byte in contenido:
-                if 32<=byte<=126:
-                    caracter = chr(byte)
-                else:
-                    caracter = "-"
                 l.append(f"{format(byte,'08b')}")
                 s_final1 += l[i]
                 i+=1
                 #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
             x = len(s_final1)
             n = 0
-            while n <= len(s_final1):
-                    if x-n < 0:
-                        l1.append(f"{s_final1[n-1024:x]}")
-                        break
-                    l1.append(f"{s_final1[n:n+1024]}")
-                    n+=1024 
+            while n < x:
+                s_pre = s_final1[n:n+1013]
+                if len(s_pre) < 1013:
+                    s_pre = s_pre + ('0' * (1013 - len(s_pre)))
+                    l1.append(s_pre)
+                    break
+                l1.append(s_pre)
+                n += 1013 
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
+
             with open(os.path.join(self.carpetaArchivos,"BTrad1024.txt"),'w') as f:
                 for b in l1:
-                    """
-
-                    ACA VA EL HAMMING DE MOD 1024 NO PARA MOD 8
-                    
-                    """
-                    x = self.hamminization(b)
+                    x = self.hamminization_not8(b)
                     f.write(x)
-                    f.write(" ")
             # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
             QMessageBox.information(self, "Éxito", "Archivo protegido con Hamming (mod 1024) correctamente. Guardado en 'BTrad1024.txt'.")
             self.refrescarPanel()
@@ -185,31 +174,24 @@ class EncodeFileController(QWidget):
                 # PASAR A BITS
                 contenido = archivo.read()
             for byte in contenido:
-                if 32<=byte<=126:
-                        caracter = chr(byte)
-                else:
-                        caracter = "-"
                 l.append(f"{format(byte,'08b')}")
                 s_final += l[i]
                 i+=1
                 #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
             x = len(s_final)
             n = 0
-            while n <= len(s_final):
-                    if x-n < 0:
-                        l1.append(f"{s_final[n-16384:x]}")
-                        break
-                    l1.append(f"{s_final[n:n+16384]}")
-                    n+=16384
+            while n < x:
+                s_pre = s_final[n:n+16384]
+                if len(s_pre) < 16384:
+                    s_pre = s_pre + ('0' * (16384 - len(s_pre)))
+                    l1.append(s_pre)
+                    break
+                l1.append(s_pre)
+                n += 16384
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
             with open(os.path.join(self.carpetaArchivos,"BTrad16384.txt"),'w') as f:
                 for b in l1:
-                    """
-
-                    ACA VA EL HAMMING DE MOD 16384 NO PARA MOD 8
-                    
-                    """
-                    #x = self.hamminization(b)
+                    x = self.hamminization_not8(b)
                     f.write(x)
                     f.write(" ")
             # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
@@ -219,9 +201,40 @@ class EncodeFileController(QWidget):
         except FileNotFoundError:
             QMessageBox.critical(self, "Error", "No se pudo encontrar el archivo seleccionado.")
 
-    """
-    FALTA ARMAR HAMMING PARA MOD 1024 y 16384. HACER!
-    """
+    #Hamming para +8 bits
+    def hamminization_not8(self,n1):
+        long = len(n1)
+        p = 0
+        while (2**p < len(n1)+p+1):
+            p+=1
+        trama = ['0'] * (long+p)
+        j = 0
+        for i in range (long+p):
+            if ((i & (i-1))!= 0):
+                trama[i-1] = n1[j]
+                j+=1
+        for l in range(p):
+            i = (2**l)
+            sum = 0
+            for cont1 in range(long):
+                preal = cont1 + 1
+                if(preal & i) != 0:
+                    if preal != i:
+                        sum = sum ^ int(trama[cont1])
+            trama[i-1] = str(sum)
+        sum=0
+
+        while l < len(trama):
+            sum += int(trama[l])
+            l+=1
+        if sum%2 == 0:
+            trama[len(trama)-1] = "1"
+        else:
+            trama[len(trama)-1] = "0"
+
+        sol = "".join(trama)
+        return sol
+    
 
 
     def hamminization8(self, n1):
