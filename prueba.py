@@ -129,11 +129,35 @@ def hamming_ver8(n1): #N1 a Cadena Hamming a verificar, N2 Cadena ya Hamminizada
 	print(l)
 
 	if (l != n1):
-		while int(l[i]) ^ int(n1[i]) ==0:
-			i+=1
-		if i == 0 or (i & (i-1)) == 0:
-			print("ERROR EN BIT DE PARIDAD")
+		i = 1
+		y = ""
+		z = ""
+		j = 0
+		while i <= len(n1):
+			if i-1 < len(l):
+				y += n1[i-1]
+				z += l[i-1]
+			j += 1
+			i = 2**j
+		xy = ""
+		for i in range(0,len(y)):
+			xy += str(int(y[i]) ^ int(z[i]))
+		xy_r = xy[::-1]
+		#print(xy_r)
+		if xy_r == 0 or (int(xy_r) & (int(xy_r) - 1)) == 0:
 			return l
+		xy_r = int(xy_r,2)
+		#print (xy_r)
+		listapp = list(n1)
+		if xy_r <= len(listapp): # <--- ESTE IF EVITA QUE EXPLOTE LA INTERFAZ
+			if listapp[xy_r-1] == '0':
+				listapp[xy_r-1] = '1'
+			else:
+				listapp[xy_r-1] = '0'
+		sol = "".join(listapp)
+		return sol
+	else:
+		return n1
 		
 
 
@@ -266,7 +290,7 @@ def fromHtoHH8(l):
 	return x
 
 def sacarbits8():
-	with open("Archivos/textoD.HA","r") as f:
+	with open("Archivos/textoD.HA1","r") as f:
 		l = ""
 		s_final= ""
 		l1 = ""
@@ -278,7 +302,7 @@ def sacarbits8():
 			bloque = l[c:c+i]
 			if(len(bloque)<i):
 				break
-			l1+=fromHtoHH8(bloque)
+			l1+=fromHtoHH8(hamming_ver8(bloque))
 			c+=i
 		for k in range(0, len(l1), 8):
 			btd = l1[k : k + 8]
