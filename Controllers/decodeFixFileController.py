@@ -99,12 +99,12 @@ class DecodeFixFileController(QWidget):
                 i+=1
             l = l2.replace(" ","")
             s_final = ""
-            while(c <= len(l)):
-                bloque = l[c:c+i+1]
-                if(len(bloque)<i):
+            while c < len(l):
+                bloque = l[c:c+i]
+                if len(bloque) < i:
                     break
                 l1 += self.sacarParidad(bloque)
-                c+=i
+                c += i
             for k in range(0, len(l1), 8):
                 btd = l1[k : k + 8]
                 if len(btd) == 8:
@@ -258,43 +258,45 @@ class DecodeFixFileController(QWidget):
     def unhamming_not8(self,n1):
         j = 0
         x = ""
-        for i in range (len(n1)):
+        for i in range(len(n1)):
             if (2**j == i+1):
-                j+=1
+                j += 1
             else:
                 x += n1[i]
         l = self.hamminization_not8(x)
-        i=0
-        if (l != n1):
-            i = 1
-            y = ""
-            z = ""
-            j = 0
-            while i <= len(n1):
-                if i-1 < len(l):
-                    y += n1[i-1]
-                    z += l[i-1]
-                j += 1
-                i = 2**j
-            xy = ""
-            for i in range(0,len(y)):
-                xy += str(int(y[i]) ^ int(z[i]))
-            xy_r = xy[::-1]
-            #print(xy_r)
-            if xy_r == 0 or (int(xy_r) & (int(xy_r) - 1)) == 0:
-                return l
-            xy_r = int(xy_r,2)
-            #print (xy_r)
-            listapp = list(n1)
-            if xy_r <= len(listapp):
-                if listapp[xy_r-1] == '0':
-                    listapp[xy_r-1] = '1'
-                else:
-                    listapp[xy_r-1] = '0'
-            sol = "".join(listapp)
-            return sol
-        else:
+        if l == n1:
             return n1
+
+        # compute syndrome from regular parity positions (exclude final overall parity)
+        y = ""
+        z = ""
+        i = 1
+        while i < len(n1):
+            y += n1[i-1]
+            z += l[i-1]
+            i *= 2
+
+        xy = "".join(str(int(y[k]) ^ int(z[k])) for k in range(len(y)))
+        syndrome = int(xy[::-1], 2) if xy else 0
+
+        overall = 0
+        for bit in n1:
+            overall ^= int(bit)
+
+        if syndrome == 0 and overall == 0:
+            return n1
+        if syndrome == 0 and overall == 1:
+            listapp = list(n1)
+            listapp[-1] = '1' if listapp[-1] == '0' else '0'
+            return "".join(listapp)
+        if syndrome != 0 and overall == 1:
+            listapp = list(n1)
+            if syndrome <= len(listapp):
+                listapp[syndrome-1] = '1' if listapp[syndrome-1] == '0' else '0'
+            return "".join(listapp)
+
+        # uncorrectable error detected
+        return n1
         
     def hamminization_not8(self,n1):
         long = len(n1)
@@ -302,30 +304,25 @@ class DecodeFixFileController(QWidget):
         while (2**p < len(n1)+p+1):
             p+=1
 
-        trama = ['0'] * (long+p)
+        trama = ['0'] * (long+p+1)
         j = 0
-        for i in range(long + p):
+        for i in range(long + p + 1):
             if (((i + 1) & i) != 0):
                 trama[i] = n1[j]
                 j += 1
         for l in range(p):
             i = (2**l)
             sum = 0
-            for cont1 in range(long+p):
+            for cont1 in range(long+p+1):
                 preal = cont1 + 1
                 if(preal & i) != 0:
                     if preal != i:
                         sum = sum ^ int(trama[cont1])
             trama[i-1] = str(sum)
-        sum=0
-        l = 0
-        while l < len(trama):
-            sum += int(trama[l])
-            l+=1
-        if sum%2 == 0:
-            trama[len(trama)-1] = "1"
-        else:
-            trama[len(trama)-1] = "0"
+        overall = 0
+        for cont1 in range(len(trama)-1):
+            overall ^= int(trama[cont1])
+        trama[-1] = str(overall)
 
         sol = "".join(trama)
         return sol

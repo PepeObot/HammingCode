@@ -103,12 +103,12 @@ class DecodeFileController(QWidget):
                 i+=1
             l = l2.replace(" ","")
             s_final = ""
-            while(c <= len(l)):
-                bloque = l[c:c+i+1]
-                if(len(bloque)<i):
+            while c < len(l):
+                bloque = l[c:c+i]
+                if len(bloque) < i:
                     break
                 l1 += self.sacarParidad(bloque)
-                c+=i
+                c += i
             for k in range(0, len(l1), 8):
                 btd = l1[k : k + 8]
                 if len(btd) == 8:

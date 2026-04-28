@@ -219,30 +219,25 @@ class EncodeFileController(QWidget):
         p = 0
         while (2**p < len(n1)+p+1):
             p+=1
-        trama = ['0'] * (long+p)
+        trama = ['0'] * (long+p+1)
         j = 0
-        for i in range(long + p):
+        for i in range(long + p + 1):
             if (((i + 1) & i) != 0):
                 trama[i] = n1[j]
                 j += 1
         for l in range(p):
             i = (2**l)
             sum = 0
-            for cont1 in range(long + p):
+            for cont1 in range(long + p + 1):
                 preal = cont1 + 1
                 if(preal & i) != 0:
                     if preal != i:
                         sum = sum ^ int(trama[cont1])
             trama[i-1] = str(sum)
-        sum=0
-    
-        # while l < len(trama):
-        #     sum += int(trama[l])
-        #     l+=1
-        # if sum%2 == 0:
-        #     trama[len(trama)-1] = "1"
-        # else:
-        #     trama[len(trama)-1] = "0"
+        overall = 0
+        for cont1 in range(len(trama)-1):
+            overall ^= int(trama[cont1])
+        trama[-1] = str(overall)
 
         sol = "".join(trama)
         return sol
