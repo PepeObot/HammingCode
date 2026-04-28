@@ -76,9 +76,9 @@ class DecodeFixFileController(QWidget):
         try: 
             if os.path.exists(rutaFile):
                 if os.path.splitext(rutaFile)[1] == ".HA1" or os.path.splitext(rutaFile)[1] == ".HE1":
-                    texto_decodificado = self.sacarbitsCorregir8(rutaFile)
+                    texto_decodificado = self.sacarbitsSinCorregir8(rutaFile)
                 else: 
-                    texto_decodificado = self.sacarbitsCorregido(rutaFile)
+                    texto_decodificado = self.sacarbitsSinCorregir(rutaFile)
                 self.textFileE.insertPlainText(texto_decodificado)
             else:
                 QMessageBox.critical(self, "Error", "El archivo seleccionado no existe.")
@@ -133,6 +133,31 @@ class DecodeFixFileController(QWidget):
                 if(len(bloque)<i):
                     break
                 l1+=self.sacarParidad8(self.hamming_ver8(bloque))
+                c+=i
+            for k in range(0, len(l1), 8):
+                btd = l1[k : k + 8]
+                if len(btd) == 8:
+                    if btd != "00000000":
+                        s_final += chr(int(btd, 2))
+        archivoFinal = os.path.splitext(rutaFile)[0] + ".DE1"
+        with open(archivoFinal,"w") as f:
+            f.write(s_final)
+        return s_final
+
+    def sacarbitsSinCorregir8(self, rutaFile):
+        with open(rutaFile, "r") as f:
+            l = ""
+            s_final= ""
+            l1 = ""
+            l2 = f.read().replace(" ","")
+            c = 0
+            i = 16
+            l = l2
+            while c<=len(l):
+                bloque = l[c:c+i]
+                if(len(bloque)<i):
+                    break
+                l1+=self.sacarParidad8(bloque)
                 c+=i
             for k in range(0, len(l1), 8):
                 btd = l1[k : k + 8]
