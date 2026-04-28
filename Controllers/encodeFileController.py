@@ -80,7 +80,7 @@ class EncodeFileController(QWidget):
         rutaFile = os.path.join(directorio_actual, "..", "Archivos", nombre_archivo)
         try:
             if os.path.exists(rutaFile):
-                with open(rutaFile, 'r', encoding='utf-8') as f:
+                with open(rutaFile, 'r') as f:
                     contenido = f.read()
                     self.textFile.setPlainText(contenido)
             else:
@@ -190,7 +190,7 @@ class EncodeFileController(QWidget):
                 l1.append(s_pre)
                 n += 16369
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
-            with open(os.path.join(self.carpetaArchivos,"BTrad16384.HA1"),'w') as f:
+            with open(os.path.join(self.carpetaArchivos,"BTrad16384.HA3"),'w') as f:
                 for b in l1:
                     x = self.hamminization_not8(b)
                     f.write(x)

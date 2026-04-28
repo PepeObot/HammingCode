@@ -181,7 +181,7 @@ def unhamming_not8(n1):
 		
 		
 def sacarbits():
-	with open("Archivos/BTrad16384.HA1","r") as f:
+	with open("Archivos/BTrad1024.txt","r") as f:
 		l2 = f.read()
 		l1 = ""
 		l=""
@@ -195,6 +195,7 @@ def sacarbits():
 		s_final = ""
 		while(c <= len(l)):
 			bloque = l[c:c+i+1]
+			#print(len(bloque))
 			if(len(bloque)<i):
 				break
 			l1 += fromHtoHH(unhamming_not8(bloque))
@@ -295,6 +296,6 @@ def sacarbits8():
 #s_pre = "01011101" + ('0' * (1014-500))
 #print(s_pre)
 
-unhamming_not8(n1)
-sacarbits()
-sacarbits8()
+#unhamming_not8(n1)
+#sacarbits()
+#sacarbits8()
