@@ -119,31 +119,6 @@ class DecodeFixFileController(QWidget):
         #     f.write(s_final)
         return s_final
     
-    def sacarbitsCorregir8(self, rutaFile):
-        with open(rutaFile, "r") as f:
-            l = ""
-            s_final= ""
-            l1 = ""
-            l2 = f.read().replace(" ","")
-            c = 0
-            i = 16
-            l = l2
-            while c<=len(l):
-                bloque = l[c:c+i]
-                if(len(bloque)<i):
-                    break
-                l1+=self.sacarParidad8(self.hamming_ver8(bloque))
-                c+=i
-            for k in range(0, len(l1), 8):
-                btd = l1[k : k + 8]
-                if len(btd) == 8:
-                    if btd != "00000000":
-                        s_final += chr(int(btd, 2))
-        archivoFinal = os.path.splitext(rutaFile)[0] + ".DE1"
-        with open(archivoFinal,"w") as f:
-            f.write(s_final)
-        return s_final
-
     def sacarbitsSinCorregir8(self, rutaFile):
         with open(rutaFile, "r") as f:
             l = ""
@@ -180,9 +155,7 @@ class DecodeFixFileController(QWidget):
         try: 
             if os.path.exists(rutaFile):
                 if os.path.splitext(rutaFile)[1] == ".HA1" or os.path.splitext(rutaFile)[1] == ".HE1":
-                    print("1")
                     texto_decodificado = self.sacarbitsCorregir8(rutaFile)
-                    print("2")
                 else: 
                     texto_decodificado = self.sacarbitsCorregido(rutaFile)
                 self.textFileC.insertPlainText(texto_decodificado)
@@ -194,6 +167,31 @@ class DecodeFixFileController(QWidget):
             QMessageBox.critical(self, "Error", "No se ha podido leer el archivo seleccionado.")
         except ValueError as ve:
             QMessageBox.critical(self, "Error de Datos", f"El archivo contiene caracteres no binarios o está corrupto.\nDetalle: {ve}")
+    
+    def sacarbitsCorregir8(self, rutaFile):
+        with open(rutaFile, "r") as f:
+            l = ""
+            s_final= ""
+            l1 = ""
+            l2 = f.read().replace(" ","")
+            c = 0
+            i = 16
+            l = l2
+            while c<=len(l):
+                bloque = l[c:c+i]
+                if(len(bloque)<i):
+                    break
+                l1+=self.sacarParidad8(self.hamming_ver8(bloque))
+                c+=i
+            for k in range(0, len(l1), 8):
+                btd = l1[k : k + 8]
+                if len(btd) == 8:
+                    if btd != "00000000":
+                        s_final += chr(int(btd, 2))
+        archivoFinal = os.path.splitext(rutaFile)[0] + ".DE1"
+        with open(archivoFinal,"w") as f:
+            f.write(s_final)
+        return s_final
         
     
     def sacarbitsCorregido(self, rutaFile):
