@@ -188,7 +188,7 @@ class DecodeFixFileController(QWidget):
                 if len(btd) == 8:
                     if btd != "00000000":
                         s_final += chr(int(btd, 2))
-        archivoFinal = os.path.splitext(rutaFile)[0] + ".DE1"
+        archivoFinal = os.path.splitext(rutaFile)[0] + ".DC1"
         with open(archivoFinal,"w") as f:
             f.write(s_final)
         return s_final
@@ -220,7 +220,11 @@ class DecodeFixFileController(QWidget):
                     if btd != "00000000":
                         s_final += chr(int(btd, 2))
         #ruta_trad = os.path.join(self.carpetaArchivos, "Trad.txt")
-        archivoFinal = os.path.splitext(rutaFile)[0] + ".DCx"
+        match os.path.splitext(rutaFile)[1]:
+            case ".HA2" | ".HE2":
+                archivoFinal = os.path.splitext(rutaFile)[0] + ".DC2"
+            case ".HA3" | ".HE3":
+                archivoFinal = os.path.splitext(rutaFile)[0] + ".DC3"
         with open(archivoFinal, "w") as f:
             f.write(s_final)        # Aca se traba al deshamminizar con mod 8
         return s_final
