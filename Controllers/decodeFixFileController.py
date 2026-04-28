@@ -207,15 +207,13 @@ class DecodeFixFileController(QWidget):
                 if l2[i] == " ":
                     break
                 i+=1
-            i+=1
-            print(i)
+            #i+=1
             l = l2.replace(" ","")
             s_final = ""
             while(c <= len(l)):
                 bloque = l[c:c+i]
                 if(len(bloque)<i):
                     break
-                print(f"Procesando bloque: {bloque}")
                 l1 += self.sacarParidad(self.unhamming_not8(bloque)) 
                 c+=i
             for k in range(0, len(l1), 8):
