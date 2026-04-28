@@ -28,7 +28,7 @@ class DecodeFileController(QWidget):
 
         # --------- ACCIONES DE BOTONES Y EVENTOS ----------------------------------------------------------------------------------------------------
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     # Cambia al panel de inicio, el indice 0 es el panel_inicio
-        #self.desproteger_btn.clicked.connected()
+        #self.desproteger_btn.clicked.connected(sel.mostrarArchivoD)
         self.tableFile.itemSelectionChanged.connect(self.mostrarArchivoP)
 
 
@@ -94,6 +94,8 @@ class DecodeFileController(QWidget):
                 QMessageBox.critical(self, "Error", "El archivo seleccionado no existe.")
         except Exception as e:
             QMessageBox.critical(self, "Error", "No se ha podido leer el archivo seleccionado.")
+
+    #def mostrarArchivoD (self):
 
     def sacarbitsSinErrores(self):
         with open("Archivos/BTrad1024.txt","r") as f:

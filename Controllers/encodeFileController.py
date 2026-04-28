@@ -112,7 +112,7 @@ class EncodeFileController(QWidget):
                     l.append(f"{format(byte,'08b')}")
                     #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
-            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA"),'w') as f:
+            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA1"),'w') as f:
                 bloques = [self.hamminization8(b) for b in l]
                 f.write(" ".join(bloques))
                 # for b in l:
@@ -131,6 +131,7 @@ class EncodeFileController(QWidget):
         i = 0
         s_final1 = ""
         self.fileSelect = self.obtenerArchivoSeleccionado()
+        baseFile = os.path.splitext(self.fileSelect)[0]  # Obtener el nombre del archivo, sin la extensión
         try:
             with open(os.path.join(self.carpetaArchivos,self.fileSelect),'rb')as archivo:
                 # PASAR A BITS
@@ -152,13 +153,13 @@ class EncodeFileController(QWidget):
                 n += 1013 
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
 
-            with open(os.path.join(self.carpetaArchivos,"BTrad1024.HA2"),'w') as f:
+            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA2"),'w') as f:
                 for b in l1:
                     x = self.hamminization_not8(b)
                     f.write(x)
                     f.write(" ")
             # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
-            QMessageBox.information(self, "Éxito", "Archivo protegido con Hamming (mod 1024) correctamente. Guardado en 'BTrad1024.txt'.")
+            QMessageBox.information(self, "Éxito", f"Archivo protegido con Hamming (mod 8) correctamente. \nGuardado en '{baseFile}.HA2'.")
             self.refrescarPanel()
 
         except FileNotFoundError:
@@ -170,6 +171,7 @@ class EncodeFileController(QWidget):
         i = 0
         s_final = ""
         self.fileSelect = self.obtenerArchivoSeleccionado()
+        baseFile = os.path.splitext(self.fileSelect)[0]  # Obtener el nombre del archivo, sin la extensión
         try:
             with open(os.path.join(self.carpetaArchivos,self.fileSelect),'rb')as archivo:
                 # PASAR A BITS
@@ -190,13 +192,13 @@ class EncodeFileController(QWidget):
                 l1.append(s_pre)
                 n += 16369
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
-            with open(os.path.join(self.carpetaArchivos,"BTrad16384.HA3"),'w') as f:
+            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA3"),'w') as f:
                 for b in l1:
                     x = self.hamminization_not8(b)
                     f.write(x)
                     f.write(" ")
             # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
-            QMessageBox.information(self, "Éxito", "Archivo protegido con Hamming (mod 16384) correctamente. Guardado en 'BTrad16384.txt'.")
+            QMessageBox.information(self, "Éxito", f"Archivo protegido con Hamming (mod 8) correctamente. \nGuardado en '{baseFile}.HA3'.")
             self.refrescarPanel()
 
         except FileNotFoundError:

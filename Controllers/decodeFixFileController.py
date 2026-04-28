@@ -23,6 +23,7 @@ class DecodeFixFileController(QWidget):
         self.cargarTabla()  
 
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     
+        self.desproteger_btn.clicked.connect(self.mostrarArchivoD)
         self.tableFile.itemSelectionChanged.connect(self.mostrarArchivoP)
 
 
@@ -64,7 +65,7 @@ class DecodeFixFileController(QWidget):
                     self.tableFile.setItem(rowPosition, 0, QTableWidgetItem(f))             # Nombre
                     self.tableFile.setItem(rowPosition, 1, QTableWidgetItem(tamaño_str))    # Tamaño
     
-    def mostrarArchivoP(self):
+    def mostrarArchivoD(self):
         self.textFileP.clear()  
         seleccion = self.tableFile.selectedItems()
         if not seleccion:
@@ -77,7 +78,7 @@ class DecodeFixFileController(QWidget):
             if os.path.exists(rutaFile):
                 texto_decodificado = self.sacarbits(rutaFile)
                 
-                self.textFileP.setPlainText(texto_decodificado)
+                self.textFileD.setPlainText(texto_decodificado)
             else:
                 QMessageBox.critical(self, "Error", "El archivo seleccionado no existe.")
         except Exception as e:

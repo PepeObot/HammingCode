@@ -252,8 +252,8 @@ def fromHtoHH8(l):
 	j = 0	
 	x=""
 	x1=""
-	y = n1[0:8]
-	y1= n1[8:16]
+	y = l[0:8]
+	y1= l[8:16]
 	print(y)
 	for i in range(0,8): 
 		if (2**j == i+1):
@@ -278,7 +278,7 @@ def sacarbits8():
 			bloque = l[c:c+i]
 			if(len(bloque)<i):
 				break
-			l1+=fromHtoHH8(l)
+			l1+=fromHtoHH8(bloque)
 			c+=i
 		for k in range(0, len(l1), 8):
 			btd = l1[k : k + 8]
@@ -298,4 +298,4 @@ def sacarbits8():
 
 #unhamming_not8(n1)
 #sacarbits()
-#sacarbits8()
+sacarbits8()
