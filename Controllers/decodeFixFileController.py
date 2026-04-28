@@ -24,7 +24,7 @@ class DecodeFixFileController(QWidget):
 
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     
         self.desproteger_btn.clicked.connect(self.mostrarArchivoD)
-        self.tableFile.itemSelectionChanged.connect(self.mostrarArchivoP)
+        self.tableFile.itemSelectionChanged.connect(self.mostrarArchivoD)
 
 
 
@@ -102,10 +102,12 @@ class DecodeFixFileController(QWidget):
                 if l2[i] == " ":
                     break
                 i+=1
+            i+=1
+            print(i)
             l = l2.replace(" ","")
             s_final = ""
             while(c <= len(l)):
-                bloque = l[c:c+i+1]
+                bloque = l[c:c+i]
                 if(len(bloque)<i):
                     break
                 l1 += self.fromHtoHH(self.unhamming_not8(bloque)) 
