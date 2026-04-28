@@ -106,7 +106,7 @@
     <string>Desproteger y Corregir Archivo</string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="textFileD">
+  <widget class="QTextEdit" name="textFileC">
    <property name="geometry">
     <rect>
      <x>550</x>
@@ -116,7 +116,7 @@
     </rect>
    </property>
   </widget>
-  <widget class="QTextEdit" name="textFileP">
+  <widget class="QTextEdit" name="textFileE">
    <property name="geometry">
     <rect>
      <x>550</x>
@@ -131,7 +131,7 @@
     <rect>
      <x>560</x>
      <y>120</y>
-     <width>171</width>
+     <width>251</width>
      <height>21</height>
     </rect>
    </property>
@@ -142,7 +142,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Archivo Protegido:</string>
+    <string>Archivo desprotegido sin corregir:</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
@@ -150,7 +150,7 @@
     <rect>
      <x>560</x>
      <y>380</y>
-     <width>171</width>
+     <width>251</width>
      <height>21</height>
     </rect>
    </property>
@@ -161,7 +161,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Archivo Desprotegido:</string>
+    <string>Archivo desprotegido y corregido:</string>
    </property>
   </widget>
  </widget>

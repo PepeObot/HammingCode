@@ -87,23 +87,13 @@
     <string>Seleccionar Archivo: </string>
    </property>
   </widget>
-  <widget class="QTextEdit" name="textFileP">
+  <widget class="QTextEdit" name="textFileD">
    <property name="geometry">
     <rect>
      <x>550</x>
      <y>140</y>
      <width>691</width>
-     <height>221</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QTextEdit" name="textFileD">
-   <property name="geometry">
-    <rect>
-     <x>550</x>
-     <y>400</y>
-     <width>691</width>
-     <height>221</height>
+     <height>481</height>
     </rect>
    </property>
   </widget>
@@ -126,30 +116,11 @@
     <string>Desproteger Archivo</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>560</x>
-     <y>120</y>
-     <width>171</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <pointsize>12</pointsize>
-     <bold>false</bold>
-    </font>
-   </property>
-   <property name="text">
-    <string>Archivo Protegido:</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
      <x>560</x>
-     <y>380</y>
+     <y>120</y>
      <width>171</width>
      <height>21</height>
     </rect>

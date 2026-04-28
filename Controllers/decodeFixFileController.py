@@ -18,13 +18,13 @@ class DecodeFixFileController(QWidget):
         self.tableFile.horizontalHeader().resizeSection(0, 360)
         self.tableFile.horizontalHeader().resizeSection(1, 100)
         self.tableFile.setRowCount(0)  
-        self.textFileP.setReadOnly(True)  
-        self.textFileD.setReadOnly(True)  
+        self.textFileE.setReadOnly(True)  
+        self.textFileC.setReadOnly(True)  
         self.cargarTabla()  
 
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     
-        self.desproteger_btn.clicked.connect(self.mostrarArchivoD)
-        self.tableFile.itemSelectionChanged.connect(self.mostrarArchivoP)
+        self.desproteger_btn.clicked.connect(self.mostrarArchivoC)
+        self.tableFile.itemSelectionChanged.connect(self.mostrarArchivoE)
 
 
 
@@ -34,8 +34,8 @@ class DecodeFixFileController(QWidget):
     def refrescarPanel(self):
         self.tableFile.setRowCount(0)
         self.cargarTabla()
-        self.textFileP.clear()
-        self.textFileD.clear()
+        self.textFileE.clear()
+        self.textFileC.clear()
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -65,33 +65,28 @@ class DecodeFixFileController(QWidget):
                     self.tableFile.setItem(rowPosition, 0, QTableWidgetItem(f))             # Nombre
                     self.tableFile.setItem(rowPosition, 1, QTableWidgetItem(tamaño_str))    # Tamaño
     
-    def mostrarArchivoD(self):
-        self.textFileP.clear()  
+    def mostrarArchivoE(self):
+        self.textFileE.clear()
         seleccion = self.tableFile.selectedItems()
         if not seleccion:
             return
         fila = seleccion[0].row()
         nombreFile = self.tableFile.item(fila,0).text()
         rutaFile = os.path.join(self.carpetaArchivos, nombreFile)
-        
         try: 
             if os.path.exists(rutaFile):
-                texto_decodificado = self.sacarbits(rutaFile)
-                
-                self.textFileD.setPlainText(texto_decodificado)
+                if os.path.splitext(rutaFile)[1] == ".HA1" or os.path.splitext(rutaFile)[1] == ".HE1":
+                    texto_decodificado = self.sacarbitsSinCorregir8(rutaFile)
+                else: 
+                    texto_decodificado = self.sacarbitsSinCorregir(rutaFile)
+                self.textFileE.insertPlainText(texto_decodificado)
             else:
                 QMessageBox.critical(self, "Error", "El archivo seleccionado no existe.")
         except Exception as e:
-            print(f"Error: {e}") 
+            print(f"Error al leer archivo: {e}") 
             QMessageBox.critical(self, "Error", "No se ha podido leer el archivo seleccionado.")
-        
-        except ValueError as ve:
-            QMessageBox.critical(self, "Error de Datos", f"El archivo contiene caracteres no binarios o está corrupto.\nDetalle: {ve}")
-        except Exception as e:
-            print(f"Error al leer archivo: {e}")
-            QMessageBox.critical(self, "Error", "No se ha podido leer el archivo seleccionado.")
-    
-    def sacarbits(self, rutaFile):
+
+    def sacarbitsSinCorregir(self, rutaFile):
         with open(rutaFile, "r") as f:
             l2 = f.read()
             l1 = ""
@@ -108,20 +103,106 @@ class DecodeFixFileController(QWidget):
                 bloque = l[c:c+i+1]
                 if(len(bloque)<i):
                     break
-                l1 += self.fromHtoHH(self.unhamming_not8(bloque)) 
+                l1 += self.sacarParidad(bloque)
                 c+=i
             for k in range(0, len(l1), 8):
                 btd = l1[k : k + 8]
                 if len(btd) == 8:
                     if btd != "00000000":
                         s_final += chr(int(btd, 2))
-        
-        ruta_trad = os.path.join(self.carpetaArchivos, "Trad.txt")
-        with open(ruta_trad, "w") as f:
-            f.write(s_final)
+        # match os.path.splitext(rutaFile)[1]:
+        #     case ".HA2" | ".HE2":
+        #         archivoFinal = os.path.splitext(rutaFile)[0] + ".DE2"
+        #     case ".HA3" | ".HE3":
+        #         archivoFinal = os.path.splitext(rutaFile)[0] + ".DE3"
+        # with open(archivoFinal,"w") as f:
+        #     f.write(s_final)
         return s_final
     
-    def fromHtoHH(self, l):
+    def sacarbitsSinCorregir8(self, rutaFile):
+        with open(rutaFile, "r") as f:
+            l = ""
+            s_final= ""
+            l1 = ""
+            l2 = f.read().replace(" ","")
+            c = 0
+            i = 16
+            l = l2
+            while c<=len(l):
+                bloque = l[c:c+i]
+                if(len(bloque)<i):
+                    break
+                l1+= self.sacarParidad8(bloque)
+                c+=i
+            for k in range(0, len(l1), 8):
+                btd = l1[k : k + 8]
+                if len(btd) == 8:
+                    if btd != "00000000":
+                        s_final += chr(int(btd, 2))
+        # archivoFinal = os.path.splitext(rutaFile)[0] + ".DE1"
+        # with open(archivoFinal,"w") as f:
+        #     f.write(s_final)
+        return s_final
+
+    def mostrarArchivoC(self):
+        self.textFileC.clear()  
+        seleccion = self.tableFile.selectedItems()
+        if not seleccion:
+            return
+        fila = seleccion[0].row()
+        nombreFile = self.tableFile.item(fila,0).text()
+        rutaFile = os.path.join(self.carpetaArchivos, nombreFile)
+        try: 
+            if os.path.exists(rutaFile):
+                if os.path.splitext(rutaFile)[1] == ".HA1" or os.path.splitext(rutaFile)[1] == ".HE1":
+                    print("1")
+                    texto_decodificado = self.sacarbitsCorregido8(rutaFile)
+                    print("2")
+                else: 
+                    texto_decodificado = self.sacarbitsCorregido(rutaFile)
+                self.textFileC.insertPlainText(texto_decodificado)
+            else:
+                QMessageBox.critical(self, "Error", "El archivo seleccionado no existe.")
+        
+        except Exception as e:
+            print(f"Error al leer archivo: {e}") 
+            QMessageBox.critical(self, "Error", "No se ha podido leer el archivo seleccionado.")
+        except ValueError as ve:
+            QMessageBox.critical(self, "Error de Datos", f"El archivo contiene caracteres no binarios o está corrupto.\nDetalle: {ve}")
+        
+    
+    def sacarbitsCorregido(self, rutaFile):
+        with open(rutaFile, "r") as f:
+            l2 = f.read()
+            l1 = ""
+            l=""
+            i = 0
+            c=0
+            while i<len(l2):
+                if l2[i] == " ":
+                    break
+                i+=1
+            l = l2.replace(" ","")
+            s_final = ""
+            while(c <= len(l)):
+                bloque = l[c:c+i+1]
+                if(len(bloque)<i):
+                    break
+                print(f"Procesando bloque: {bloque}")
+                l1 += self.sacarParidad(self.unhamming_not8(bloque)) 
+                c+=i
+            for k in range(0, len(l1), 8):
+                btd = l1[k : k + 8]
+                if len(btd) == 8:
+                    if btd != "00000000":
+                        s_final += chr(int(btd, 2))
+        #ruta_trad = os.path.join(self.carpetaArchivos, "Trad.txt")
+        archivoFinal = os.path.splitext(rutaFile)[0] + ".DCx"
+        with open(archivoFinal, "w") as f:
+            f.write(s_final)        # Aca se traba al deshamminizar con mod 8
+        return s_final
+    
+    def sacarParidad(self, l):
         j=0
         l1 = []
         x=""
@@ -130,6 +211,23 @@ class DecodeFixFileController(QWidget):
                 j+=1
             else:
                 x += l[s]
+        return x
+    
+    def sacarParidad8(self, l):
+        j = 0	
+        x=""
+        x1=""
+        y = l[0:8]
+        y1= l[8:16]
+        print(y)
+        for i in range(0,8): 
+            if (2**j == i+1):
+                j+=1
+            else:
+                x += y[i]
+                x1 += y1[i]
+        x+=x1
+        print(x)
         return x
     
     def unhamming_not8(self,n1):

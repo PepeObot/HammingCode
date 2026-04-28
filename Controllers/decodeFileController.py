@@ -21,15 +21,14 @@ class DecodeFileController(QWidget):
         self.tableFile.horizontalHeader().resizeSection(0, 360)
         self.tableFile.horizontalHeader().resizeSection(1, 100)
         self.tableFile.setRowCount(0)  # Limpiar la tabla antes de cargar los datos
-        self.textFileP.setReadOnly(True)  # Hacer el QTextEdit de solo lectura
         self.textFileD.setReadOnly(True)  # Hacer el QTextEdit de solo lectura
         self.cargarTabla()  # Cargar los datos en la tabla
 
 
         # --------- ACCIONES DE BOTONES Y EVENTOS ----------------------------------------------------------------------------------------------------
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     # Cambia al panel de inicio, el indice 0 es el panel_inicio
-        #self.desproteger_btn.clicked.connected(sel.mostrarArchivoD)
-        self.tableFile.itemSelectionChanged.connect(self.mostrarArchivoP)
+        self.desproteger_btn.clicked.connect(self.mostrarArchivoD)     # Muestra el contenido del archivo seleccionado en el QTextEdit de la derecha
+        #self.tableFile.itemSelectionChanged.connect(self.mostrarArchivoD)
 
 
 
@@ -39,7 +38,6 @@ class DecodeFileController(QWidget):
     def refrescarPanel(self):
         self.tableFile.setRowCount(0)
         self.cargarTabla()
-        self.textFileP.clear()
         self.textFileD.clear()
 
     def showEvent(self, event):
@@ -70,8 +68,8 @@ class DecodeFileController(QWidget):
                     self.tableFile.setItem(rowPosition, 0, QTableWidgetItem(f))             # Nombre
                     self.tableFile.setItem(rowPosition, 1, QTableWidgetItem(tamaño_str))    # Tamaño
     
-    def mostrarArchivoP (self):
-        self.textFileP.clear()  
+    def mostrarArchivoD (self):
+        self.textFileD.clear()  
         seleccion = self.tableFile.selectedItems()
         if not seleccion:
             return
@@ -80,16 +78,11 @@ class DecodeFileController(QWidget):
         rutaFile = os.path.join(self.carpetaArchivos, nombreFile)
         try: 
             if os.path.exists(rutaFile):
-                with open(rutaFile, "r") as f:
-                    contenido = f.read()
-                bloques = contenido.split()
-                for bloque in bloques:
-                    if 32<=int(bloque,2)<=126:
-                         caracter = chr(int(bloque,2))
-                    else:
-                        caracter = "$"
-                    caracter = chr(int(bloque,2))
-                    self.textFileP.insertPlainText(caracter)
+                if os.path.splitext(rutaFile)[1] == ".HA1" or os.path.splitext(rutaFile)[1] == ".HE1":
+                    texto_decodificado = self.sacarbitsSinCorregir8(rutaFile)
+                else: 
+                    texto_decodificado = self.sacarbitsSinCorregir(rutaFile)
+                self.textFileD.insertPlainText(texto_decodificado)
             else:
                 QMessageBox.critical(self, "Error", "El archivo seleccionado no existe.")
         except Exception as e:
@@ -97,8 +90,8 @@ class DecodeFileController(QWidget):
 
     #def mostrarArchivoD (self):
 
-    def sacarbitsSinErrores(self):
-        with open("Archivos/BTrad1024.txt","r") as f:
+    def sacarbitsSinCorregir(self, rutaFile):
+        with open(rutaFile, "r") as f:
             l2 = f.read()
             l1 = ""
             l=""
@@ -114,18 +107,23 @@ class DecodeFileController(QWidget):
                 bloque = l[c:c+i+1]
                 if(len(bloque)<i):
                     break
-                l1 += self.fromHtoHH(bloque)
+                l1 += self.sacarParidad(bloque)
                 c+=i
             for k in range(0, len(l1), 8):
                 btd = l1[k : k + 8]
                 if len(btd) == 8:
                     if btd != "00000000":
                         s_final += chr(int(btd, 2))
-        with open("Archivos/Trad.txt","w") as f:
+        match os.path.splitext(rutaFile)[1]:
+            case ".HA2" | ".HE2":
+                archivoFinal = os.path.splitext(rutaFile)[0] + ".DE2"
+            case ".HA3" | ".HE3":
+                archivoFinal = os.path.splitext(rutaFile)[0] + ".DE3"
+        with open(archivoFinal,"w") as f:
             f.write(s_final)
+        return s_final
 
-
-    def fromHtoHH(self, l):
+    def sacarParidad(self, l):
         j=0
         l1 = []
         x=""
@@ -134,4 +132,46 @@ class DecodeFileController(QWidget):
                 j+=1
             else:
                 x += l[s]
+        return x
+    
+    def sacarbitsSinCorregir8(self, rutaFile):
+        with open(rutaFile, "r") as f:
+            l = ""
+            s_final= ""
+            l1 = ""
+            l2 = f.read().replace(" ","")
+            c = 0
+            i = 16
+            l = l2
+            while c<=len(l):
+                bloque = l[c:c+i]
+                if(len(bloque)<i):
+                    break
+                l1+= self.sacarParidad8(bloque)
+                c+=i
+            for k in range(0, len(l1), 8):
+                btd = l1[k : k + 8]
+                if len(btd) == 8:
+                    if btd != "00000000":
+                        s_final += chr(int(btd, 2))
+        archivoFinal = os.path.splitext(rutaFile)[0] + ".DE1"
+        with open(archivoFinal,"w") as f:
+            f.write(s_final)
+        return s_final
+
+    def sacarParidad8(self, l):
+        j = 0	
+        x=""
+        x1=""
+        y = l[0:8]
+        y1= l[8:16]
+        print(y)
+        for i in range(0,8): 
+            if (2**j == i+1):
+                j+=1
+            else:
+                x += y[i]
+                x1 += y1[i]
+        x+=x1
+        print(x)
         return x
