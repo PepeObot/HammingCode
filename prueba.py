@@ -111,19 +111,8 @@ def hamming_ver8(n1): #N1 a Cadena Hamming a verificar, N2 Cadena ya Hamminizada
 			x1 += y1[i]
 
 	x+=x1
-
 	j=0
-
 	y = ""
-
-	"""
-	for i in range(0,7):
-		if (2**j == i+1):
-			j+=1
-		else:
-			x +=y1[i]
-	"""
-	
 	l = hamminization(x)
 	
 	print(l)
@@ -140,16 +129,16 @@ def hamming_ver8(n1): #N1 a Cadena Hamming a verificar, N2 Cadena ya Hamminizada
 			j += 1
 			i = 2**j
 		xy = ""
-		for i in range(0,len(y)):
-			xy += str(int(y[i]) ^ int(z[i]))
+		for k in range(0,len(y)):
+			xy += str(int(y[k]) ^ int(z[k]))
 		xy_r = xy[::-1]
 		#print(xy_r)
-		if xy_r == 0 or (int(xy_r) & (int(xy_r) - 1)) == 0:
+		if int(xy_r,2) == 0 or (int(xy_r) & (int(xy_r) - 1)) == 0:
 			return l
 		xy_r = int(xy_r,2)
 		#print (xy_r)
 		listapp = list(n1)
-		if xy_r <= len(listapp): # <--- ESTE IF EVITA QUE EXPLOTE LA INTERFAZ
+		if xy_r <= len(listapp):
 			if listapp[xy_r-1] == '0':
 				listapp[xy_r-1] = '1'
 			else:
@@ -290,7 +279,7 @@ def fromHtoHH8(l):
 	return x
 
 def sacarbits8():
-	with open("Archivos/textoD.HA1","r") as f:
+	with open("Archivos/textoD.HE1","r") as f:
 		l = ""
 		s_final= ""
 		l1 = ""
@@ -323,3 +312,10 @@ def sacarbits8():
 #unhamming_not8(n1)
 #sacarbits()
 sacarbits8()
+
+
+
+
+
+
+
