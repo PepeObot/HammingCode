@@ -234,10 +234,11 @@ class EncodeFileController(QWidget):
                     if preal != i:
                         sum = sum ^ int(trama[cont1])
             trama[i-1] = str(sum)
-        overall = 0
+
+        sum = 0
         for cont1 in range(len(trama)-1):
-            overall ^= int(trama[cont1])
-        trama[-1] = str(overall)
+            sum ^= int(trama[cont1])
+        trama[-1] = str(sum)
 
         sol = "".join(trama)
         return sol
