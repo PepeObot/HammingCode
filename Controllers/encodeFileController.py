@@ -112,7 +112,7 @@ class EncodeFileController(QWidget):
                     l.append(f"{format(byte,'08b')}")
                     #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
-            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA1"),'w') as f:
+            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA"),'w') as f:
                 bloques = [self.hamminization8(b) for b in l]
                 f.write(" ".join(bloques))
                 # for b in l:
@@ -152,10 +152,11 @@ class EncodeFileController(QWidget):
                 n += 1013 
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
 
-            with open(os.path.join(self.carpetaArchivos,"BTrad1024.txt"),'w') as f:
+            with open(os.path.join(self.carpetaArchivos,"BTrad1024.HA2"),'w') as f:
                 for b in l1:
                     x = self.hamminization_not8(b)
                     f.write(x)
+                    f.write(" ")
             # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
             QMessageBox.information(self, "Éxito", "Archivo protegido con Hamming (mod 1024) correctamente. Guardado en 'BTrad1024.txt'.")
             self.refrescarPanel()
@@ -181,15 +182,15 @@ class EncodeFileController(QWidget):
             x = len(s_final)
             n = 0
             while n < x:
-                s_pre = s_final[n:n+16384]
-                if len(s_pre) < 16384:
-                    s_pre = s_pre + ('0' * (16384 - len(s_pre)))
+                s_pre = s_final[n:n+16369]
+                if len(s_pre) < 16369:
+                    s_pre = s_pre + ('0' * (16369 - len(s_pre)))
                     l1.append(s_pre)
                     break
                 l1.append(s_pre)
-                n += 16384
+                n += 16369
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
-            with open(os.path.join(self.carpetaArchivos,"BTrad16384.txt"),'w') as f:
+            with open(os.path.join(self.carpetaArchivos,"BTrad16384.HA1"),'w') as f:
                 for b in l1:
                     x = self.hamminization_not8(b)
                     f.write(x)

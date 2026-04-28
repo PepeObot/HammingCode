@@ -140,7 +140,7 @@ def hamming_ver8(n1): #N1 a Cadena Hamming a verificar, N2 Cadena ya Hamminizada
 def unhamming_not8(n1):
 	j = 0
 	x = ""
-	for i in range (0,len(n1)):
+	for i in range (len(n1)):
 		if (2**j == i+1):
 			j+=1
 		else:
@@ -148,14 +148,15 @@ def unhamming_not8(n1):
 	l = hamminization_not8(x)
 	i=0
 	if (l != n1):
-		i = 0
+		i = 1
 		y = ""
 		z = ""
 		j = 0
 		while i <= len(n1):
-			y += n1[i-1]
-			z += l[i-1]
-			j+=1
+			if i-1 < len(l):
+				y += n1[i-1]
+				z += l[i-1]
+			j += 1
 			i = 2**j
 		xy = ""
 		for i in range(0,len(y)):
@@ -167,29 +168,62 @@ def unhamming_not8(n1):
 		xy_r = int(xy_r,2)
 		#print (xy_r)
 		listapp = list(n1)
-		if listapp[xy_r-1] == '0':
-			listapp[xy_r-1] = '1'
-		else:
-			listapp[xy_r-1] = '0'
+		if xy_r <= len(listapp): # <--- ESTE IF EVITA QUE EXPLOTE LA INTERFAZ
+			if listapp[xy_r-1] == '0':
+				listapp[xy_r-1] = '1'
+			else:
+				listapp[xy_r-1] = '0'
 		sol = "".join(listapp)
 		return sol
 	else:
 		return n1
+
 		
 		
 def sacarbits():
+	with open("Archivos/BTrad16384.HA1","r") as f:
+		l2 = f.read()
+		l1 = ""
+		l=""
+		i = 0
+		c=0
+		while i<len(l2):
+			if l2[i] == " ":
+				break
+			i+=1
+		l = l2.replace(" ","")
+		s_final = ""
+		while(c <= len(l)):
+			bloque = l[c:c+i+1]
+			if(len(bloque)<i):
+				break
+			l1 += fromHtoHH(unhamming_not8(bloque))
+			c+=i
+		for k in range(0, len(l1), 8):
+			btd = l1[k : k + 8]
+			if len(btd) == 8:
+				if btd != "00000000":
+					s_final += chr(int(btd, 2))
+	with open("Archivos/Trad.txt","w") as f:
+		f.write(s_final)
+
+
+def sacarbitsSinErrores():
 	with open("Archivos/BTrad1024.txt","r") as f:
 		l2 = f.read()
 		l1 = ""
 		l=""
 		i = 0
 		c=0
-		i = 1023
+		while i<len(l2):
+			if l2[i] == " ":
+				break
+			i+=1
 		l = l2.replace(" ","")
 		s_final = ""
 		while(c <= len(l)):
-			bloque = l[c:c+i]
-			if(len(bloque)<1023):
+			bloque = l[c:c+i+1]
+			if(len(bloque)<i):
 				break
 			l1 += fromHtoHH(bloque)
 			c+=i
@@ -207,11 +241,51 @@ def fromHtoHH(l):
 	l1 = []
 	x=""
 	for s in range(len(l)):
-		if j < 11 and (2**j == s+1):
+		if (2**j == s+1):
 			j+=1
 		else:
 			x += l[s]
 	return x
+
+def fromHtoHH8(l):
+	j = 0	
+	x=""
+	x1=""
+	y = n1[0:8]
+	y1= n1[8:16]
+	print(y)
+	for i in range(0,8): 
+		if (2**j == i+1):
+			j+=1
+		else:
+			x += y[i]
+			x1 += y1[i]
+	x+=x1
+	print(x)
+	return x
+
+def sacarbits8():
+	with open("Archivos/textoD.HA","r") as f:
+		l = ""
+		s_final= ""
+		l1 = ""
+		l2 = f.read().replace(" ","")
+		c = 0
+		i = 16
+		l = l2
+		while c<=len(l):
+			bloque = l[c:c+i]
+			if(len(bloque)<i):
+				break
+			l1+=fromHtoHH8(l)
+			c+=i
+		for k in range(0, len(l1), 8):
+			btd = l1[k : k + 8]
+			if len(btd) == 8:
+				if btd != "00000000":
+					s_final += chr(int(btd, 2))
+	with open("Archivos/Trad8.txt","w") as f:
+		f.write(s_final)
 
 
 #x = hamming_ver8(n1,n2)
@@ -223,3 +297,4 @@ def fromHtoHH(l):
 
 unhamming_not8(n1)
 sacarbits()
+sacarbits8()

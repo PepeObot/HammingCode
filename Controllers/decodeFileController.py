@@ -84,10 +84,10 @@ class DecodeFileController(QWidget):
                     contenido = f.read()
                 bloques = contenido.split()
                 for bloque in bloques:
-                    # if 32<=int(bloque,2)<=126:
-                    #     caracter = chr(int(bloque,2))
-                    # else:
-                    #     caracter = "$"
+                    if 32<=int(bloque,2)<=126:
+                         caracter = chr(int(bloque,2))
+                    else:
+                        caracter = "$"
                     caracter = chr(int(bloque,2))
                     self.textFileP.insertPlainText(caracter)
             else:
@@ -95,3 +95,41 @@ class DecodeFileController(QWidget):
         except Exception as e:
             QMessageBox.critical(self, "Error", "No se ha podido leer el archivo seleccionado.")
 
+    def sacarbitsSinErrores(self):
+        with open("Archivos/BTrad1024.txt","r") as f:
+            l2 = f.read()
+            l1 = ""
+            l=""
+            i = 0
+            c=0
+            while i<len(l2):
+                if l2[i] == " ":
+                    break
+                i+=1
+            l = l2.replace(" ","")
+            s_final = ""
+            while(c <= len(l)):
+                bloque = l[c:c+i+1]
+                if(len(bloque)<i):
+                    break
+                l1 += self.fromHtoHH(bloque)
+                c+=i
+            for k in range(0, len(l1), 8):
+                btd = l1[k : k + 8]
+                if len(btd) == 8:
+                    if btd != "00000000":
+                        s_final += chr(int(btd, 2))
+        with open("Archivos/Trad.txt","w") as f:
+            f.write(s_final)
+
+
+    def fromHtoHH(self, l):
+        j=0
+        l1 = []
+        x=""
+        for s in range(len(l)):
+            if (2**j == s+1):
+                j+=1
+            else:
+                x += l[s]
+        return x
