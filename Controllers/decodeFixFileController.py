@@ -71,6 +71,7 @@ class DecodeFixFileController(QWidget):
     
     def mostrarArchivoE(self):
         self.textFileE.clear()
+        self.textFileC.clear()
         seleccion = self.tableFile.selectedItems()
         if not seleccion:
             return
