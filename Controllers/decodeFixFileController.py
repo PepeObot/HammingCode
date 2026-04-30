@@ -12,6 +12,8 @@ class DecodeFixFileController(QWidget):
         self.directorioBase = os.path.dirname(os.path.abspath(__file__))            
         self.carpetaArchivos = os.path.join(self.directorioBase, "..", "Archivos")  
 
+        # ---------- SETEOS INICIALES ---------------------------------------------------------------------------------------------------------
+        # Cargamos la tabla
         self.tableFile.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)  
         self.tableFile.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)    
         self.tableFile.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)      
@@ -22,6 +24,8 @@ class DecodeFixFileController(QWidget):
         self.textFileC.setReadOnly(True)  
         self.cargarTabla()  
 
+
+        # --------- ACCIONES DE BOTONES Y EVENTOS ---------------------------------------------------------------------------------------------
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     
         self.desproteger_btn.clicked.connect(self.mostrarArchivoC)
         self.tableFile.itemSelectionChanged.connect(self.mostrarArchivoE)
