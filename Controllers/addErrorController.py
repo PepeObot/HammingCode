@@ -179,57 +179,47 @@ class AddErrorController(QWidget):
         rutaFile = os.path.join(directorio_actual, "..", "Archivos", nombre_archivo)
         
         try:
-            with open(rutaFile, "r") as archivo:
+            with open(rutaFile, "rb") as archivo:
                 contenido = archivo.read()
             
             # Separamos el contenido en bloques usando los espacios
-            bloques = contenido.split()
-            bloques_procesados = []
-
-            for bloque_texto in bloques:
-                # Convertimos el string en lista para poder modificar un carácter específico
-                lista_bits = list(bloque_texto)
+            datos = bytearray(contenido)
+            
                 
-                match os.path.splitext(rutaFile)[1]:
-                    case ".HA1":
-                        # Probabilidad de que se inserte un error en el bloque
+            match os.path.splitext(rutaFile)[1]:
+                case ".HA1":
+                    # Probabilidad de que se inserte un error en el bloque
+                    for i in range(0, len(datos), 1):
+                        limite = min(i + 1, len(datos))
                         if random.random() < 0.3:
-                            # Elegimos la posicion a modificar
-                            posError = random.randint(0, len(lista_bits) - 1)
-                            
+                            # Elegimos el bit a modificar
+                            byteError = random.randint(i, limite - 1)
+                            bitError = random.randint(0, 7)  
                             # Invertimos el bit de la posicion elegida
-                            bit_actual = lista_bits[posError]
-                            if bit_actual == '0':
-                                lista_bits[posError] = '1'
-                            else:
-                                lista_bits[posError] = '0'
-                    case ".HA2":
-                        # Probabilidad de que se inserte un error en el bloque
+                            datos[byteError] ^= (1 << bitError)
+
+                case ".HA2":
+                    # Probabilidad de que se inserte un error en el bloque
+                    for i in range(0, len(datos), 128):
+                        limite = min(i + 128, len(datos))
                         if random.random() < 0.5:
-                            # Elegimos la posicion a modificar
-                            posError = random.randint(0, len(lista_bits) - 1)
-                            
+                            # Elegimos el bit a modificar
+                            byteError = random.randint(i, limite - 1)
+                            bitError = random.randint(0, 7)  
                             # Invertimos el bit de la posicion elegida
-                            bit_actual = lista_bits[posError]
-                            if bit_actual == '0':
-                                lista_bits[posError] = '1'
-                            else:
-                                lista_bits[posError] = '0'
-                    case ".HA3":
-                        # Probabilidad de que se inserte un error en el bloque
+                            datos[byteError] ^= (1 << bitError)
+
+                case ".HA3":
+                    # Probabilidad de que se inserte un error en el bloque
+                    for i in range(0, len(datos), 2048):
+                        limite = min(i + 2048, len(datos))
                         if random.random() < 0.75:
-                            # Elegimos la posicion a modificar
-                            posError = random.randint(0, len(lista_bits) - 1)
-                            
+                            # Elegimos el bit a modificar
+                            byteError = random.randint(i, limite - 1)
+                            bitError = random.randint(0, 7)  
                             # Invertimos el bit de la posicion elegida
-                            bit_actual = lista_bits[posError]
-                            if bit_actual == '0':
-                                lista_bits[posError] = '1'
-                            else:
-                                lista_bits[posError] = '0'
+                            datos[byteError] ^= (1 << bitError)
                 
-                # Pasamos el bloque nuevamente a string y lo agregamos a la lista de bloques procesados
-                bloques_procesados.append("".join(lista_bits))
             
             # Guardamos el resultado final en un archivo .HE1, .HE2 o .HE3
             match os.path.splitext(rutaFile)[1]:
@@ -240,12 +230,11 @@ class AddErrorController(QWidget):
                 case ".HA3":
                     archivoFinal = os.path.splitext(rutaFile)[0] + ".HE3"
             
-            resultado = " ".join(bloques_procesados)
-            with open(archivoFinal, "w") as archivo_salida:
-                archivo_salida.write(resultado)
+            with open(archivoFinal, "wb") as archivo_salida:
+                archivo_salida.write(datos)
             QMessageBox.information(self, "Éxito", f"Inserción de error completada. \nArchivo guardado como: {os.path.basename(archivoFinal)}")
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"No se pudo procesar el archivo")
+            QMessageBox.critical(self, "Error", f"No se pudo procesar el archivo\nError: {str(e)}")
          
 
 
