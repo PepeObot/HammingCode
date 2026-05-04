@@ -135,29 +135,19 @@ class DecodeFileController(QWidget):
         return x
     
     def sacarbitsSinCorregir8(self, rutaFile):
-        with open(rutaFile, "r") as f:
-            l = ""
-            s_final= ""
-            l1 = ""
-            l2 = f.read().replace(" ","")
-            c = 0
-            i = 16
-            l = l2
-            while c<=len(l):
-                bloque = l[c:c+i]
-                if(len(bloque)<i):
-                    break
-                l1+= self.sacarParidad8(bloque)
-                c+=i
-            for k in range(0, len(l1), 8):
-                btd = l1[k : k + 8]
-                if len(btd) == 8:
-                    if btd != "00000000":
-                        s_final += chr(int(btd, 2))
+        with open(rutaFile, "rb") as f:
+            raw = f.read()
+        bit_stream = "".join(f"{byte:08b}" for byte in raw)
+        decod = bytearray()
+        for c in range(0, len(bit_stream), 16):
+            bloque = bit_stream[c:c+16]
+            if len(bloque) < 16:
+                break
+            decod.append(int(self.sacarParidad8(bloque), 2))
         archivoFinal = os.path.splitext(rutaFile)[0] + ".DE1"
-        with open(archivoFinal,"w") as f:
-            f.write(s_final)
-        return s_final
+        with open(archivoFinal, "wb") as f:
+            f.write(decod)
+        return decod.decode("latin-1", errors="replace")
 
     def sacarParidad8(self, l):
         j = 0	

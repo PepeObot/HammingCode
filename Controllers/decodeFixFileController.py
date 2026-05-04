@@ -125,29 +125,19 @@ class DecodeFixFileController(QWidget):
         return s_final
     
     def sacarbitsSinCorregir8(self, rutaFile):
-        with open(rutaFile, "r") as f:
-            l = ""
-            s_final= ""
-            l1 = ""
-            l2 = f.read().replace(" ","")
-            c = 0
-            i = 16
-            l = l2
-            while c<=len(l):
-                bloque = l[c:c+i]
-                if(len(bloque)<i):
-                    break
-                l1+=self.sacarParidad8(bloque)
-                c+=i
-            for k in range(0, len(l1), 8):
-                btd = l1[k : k + 8]
-                if len(btd) == 8:
-                    if btd != "00000000":
-                        s_final += chr(int(btd, 2))
+        with open(rutaFile, "rb") as f:
+            raw = f.read()
+        bit_stream = "".join(f"{byte:08b}" for byte in raw)
+        decoded = bytearray()
+        for c in range(0, len(bit_stream), 16):
+            bloque = bit_stream[c:c+16]
+            if len(bloque) < 16:
+                break
+            decoded.append(int(self.sacarParidad8(bloque), 2))
         archivoFinal = os.path.splitext(rutaFile)[0] + ".DE1"
-        with open(archivoFinal,"w") as f:
-            f.write(s_final)
-        return s_final
+        with open(archivoFinal, "wb") as f:
+            f.write(decoded)
+        return decoded.decode("latin-1", errors="replace")
 
     def mostrarArchivoC(self):
         self.textFileC.clear()  
@@ -174,29 +164,20 @@ class DecodeFixFileController(QWidget):
             QMessageBox.critical(self, "Error de Datos", f"El archivo contiene caracteres no binarios o está corrupto.\nDetalle: {ve}")
     
     def sacarbitsCorregir8(self, rutaFile):
-        with open(rutaFile, "r") as f:
-            l = ""
-            s_final= ""
-            l1 = ""
-            l2 = f.read().replace(" ","")
-            c = 0
-            i = 16
-            l = l2
-            while c<=len(l):
-                bloque = l[c:c+i]
-                if(len(bloque)<i):
-                    break
-                l1+=self.sacarParidad8(self.hamming_ver8(bloque))
-                c+=i
-            for k in range(0, len(l1), 8):
-                btd = l1[k : k + 8]
-                if len(btd) == 8:
-                    if btd != "00000000":
-                        s_final += chr(int(btd, 2))
+        with open(rutaFile, "rb") as f:
+            raw = f.read()
+        bit_stream = "".join(f"{byte:08b}" for byte in raw)
+        decoded = bytearray()
+        for c in range(0, len(bit_stream), 16):
+            bloque = bit_stream[c:c+16]
+            if len(bloque) < 16:
+                break
+            corrected = self.hamming_ver8(bloque)
+            decoded.append(int(self.sacarParidad8(corrected), 2))
         archivoFinal = os.path.splitext(rutaFile)[0] + ".DC1"
-        with open(archivoFinal,"w") as f:
-            f.write(s_final)
-        return s_final
+        with open(archivoFinal, "wb") as f:
+            f.write(decoded)
+        return decoded.decode("latin-1", errors="replace")
         
     
     def sacarbitsCorregido(self, rutaFile):
@@ -250,7 +231,7 @@ class DecodeFixFileController(QWidget):
         x=""
         x1=""
         y = l[0:8]
-        y1= l[8:16]
+        y1 = l[8:16]
         for i in range(0,8): 
             if (2**j == i+1):
                 j+=1
