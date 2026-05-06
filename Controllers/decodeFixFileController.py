@@ -12,6 +12,8 @@ class DecodeFixFileController(QWidget):
         self.directorioBase = os.path.dirname(os.path.abspath(__file__))            
         self.carpetaArchivos = os.path.join(self.directorioBase, "..", "Archivos")  
 
+        # ---------- SETEOS INICIALES ---------------------------------------------------------------------------------------------------------
+        # Cargamos la tabla
         self.tableFile.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)  
         self.tableFile.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)    
         self.tableFile.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)      
@@ -22,6 +24,8 @@ class DecodeFixFileController(QWidget):
         self.textFileC.setReadOnly(True)  
         self.cargarTabla()  
 
+
+        # --------- ACCIONES DE BOTONES Y EVENTOS ---------------------------------------------------------------------------------------------
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     
         self.desproteger_btn.clicked.connect(self.mostrarArchivoC)
         self.tableFile.itemSelectionChanged.connect(self.mostrarArchivoE)
@@ -67,6 +71,7 @@ class DecodeFixFileController(QWidget):
     
     def mostrarArchivoE(self):
         self.textFileE.clear()
+        self.textFileC.clear()
         seleccion = self.tableFile.selectedItems()
         if not seleccion:
             return
@@ -99,12 +104,12 @@ class DecodeFixFileController(QWidget):
                 i+=1
             l = l2.replace(" ","")
             s_final = ""
-            while(c <= len(l)):
-                bloque = l[c:c+i+1]
-                if(len(bloque)<i):
+            while c < len(l):
+                bloque = l[c:c+i]
+                if len(bloque) < i:
                     break
                 l1 += self.sacarParidad(bloque)
-                c+=i
+                c += i
             for k in range(0, len(l1), 8):
                 btd = l1[k : k + 8]
                 if len(btd) == 8:
@@ -120,29 +125,19 @@ class DecodeFixFileController(QWidget):
         return s_final
     
     def sacarbitsSinCorregir8(self, rutaFile):
-        with open(rutaFile, "r") as f:
-            l = ""
-            s_final= ""
-            l1 = ""
-            l2 = f.read().replace(" ","")
-            c = 0
-            i = 16
-            l = l2
-            while c<=len(l):
-                bloque = l[c:c+i]
-                if(len(bloque)<i):
-                    break
-                l1+=self.sacarParidad8(bloque)
-                c+=i
-            for k in range(0, len(l1), 8):
-                btd = l1[k : k + 8]
-                if len(btd) == 8:
-                    if btd != "00000000":
-                        s_final += chr(int(btd, 2))
+        with open(rutaFile, "rb") as f:
+            raw = f.read()
+        bit_stream = "".join(f"{byte:08b}" for byte in raw)
+        decoded = bytearray()
+        for c in range(0, len(bit_stream), 16):
+            bloque = bit_stream[c:c+16]
+            if len(bloque) < 16:
+                break
+            decoded.append(int(self.sacarParidad8(bloque), 2))
         archivoFinal = os.path.splitext(rutaFile)[0] + ".DE1"
-        with open(archivoFinal,"w") as f:
-            f.write(s_final)
-        return s_final
+        with open(archivoFinal, "wb") as f:
+            f.write(decoded)
+        return decoded.decode("latin-1", errors="replace")
 
     def mostrarArchivoC(self):
         self.textFileC.clear()  
@@ -169,29 +164,20 @@ class DecodeFixFileController(QWidget):
             QMessageBox.critical(self, "Error de Datos", f"El archivo contiene caracteres no binarios o está corrupto.\nDetalle: {ve}")
     
     def sacarbitsCorregir8(self, rutaFile):
-        with open(rutaFile, "r") as f:
-            l = ""
-            s_final= ""
-            l1 = ""
-            l2 = f.read().replace(" ","")
-            c = 0
-            i = 16
-            l = l2
-            while c<=len(l):
-                bloque = l[c:c+i]
-                if(len(bloque)<i):
-                    break
-                l1+=self.sacarParidad8(self.hamming_ver8(bloque))
-                c+=i
-            for k in range(0, len(l1), 8):
-                btd = l1[k : k + 8]
-                if len(btd) == 8:
-                    if btd != "00000000":
-                        s_final += chr(int(btd, 2))
-        archivoFinal = os.path.splitext(rutaFile)[0] + ".DE1"
-        with open(archivoFinal,"w") as f:
-            f.write(s_final)
-        return s_final
+        with open(rutaFile, "rb") as f:
+            raw = f.read()
+        bit_stream = "".join(f"{byte:08b}" for byte in raw)
+        decoded = bytearray()
+        for c in range(0, len(bit_stream), 16):
+            bloque = bit_stream[c:c+16]
+            if len(bloque) < 16:
+                break
+            corrected = self.hamming_ver8(bloque)
+            decoded.append(int(self.sacarParidad8(corrected), 2))
+        archivoFinal = os.path.splitext(rutaFile)[0] + ".DC1"
+        with open(archivoFinal, "wb") as f:
+            f.write(decoded)
+        return decoded.decode("latin-1", errors="replace")
         
     
     def sacarbitsCorregido(self, rutaFile):
@@ -220,7 +206,11 @@ class DecodeFixFileController(QWidget):
                     if btd != "00000000":
                         s_final += chr(int(btd, 2))
         #ruta_trad = os.path.join(self.carpetaArchivos, "Trad.txt")
-        archivoFinal = os.path.splitext(rutaFile)[0] + ".DCx"
+        match os.path.splitext(rutaFile)[1]:
+            case ".HA2" | ".HE2":
+                archivoFinal = os.path.splitext(rutaFile)[0] + ".DC2"
+            case ".HA3" | ".HE3":
+                archivoFinal = os.path.splitext(rutaFile)[0] + ".DC3"
         with open(archivoFinal, "w") as f:
             f.write(s_final)        # Aca se traba al deshamminizar con mod 8
         return s_final
@@ -241,7 +231,7 @@ class DecodeFixFileController(QWidget):
         x=""
         x1=""
         y = l[0:8]
-        y1= l[8:16]
+        y1 = l[8:16]
         for i in range(0,8): 
             if (2**j == i+1):
                 j+=1
@@ -254,12 +244,13 @@ class DecodeFixFileController(QWidget):
     def unhamming_not8(self,n1):
         j = 0
         x = ""
-        for i in range (len(n1)):
+        for i in range(len(n1)):
             if (2**j == i+1):
-                j+=1
+                j += 1
             else:
                 x += n1[i]
         l = self.hamminization_not8(x)
+<<<<<<< HEAD
         i=0
         if (l != n1):
             i = 1
@@ -292,29 +283,69 @@ class DecodeFixFileController(QWidget):
             sol = "".join(listapp)
             return sol
         else:
+=======
+        if l == n1:
+>>>>>>> c214fcf02fb11f4518a5f2a1a671d278c40627d7
             return n1
+
+        # compute syndrome from regular parity positions (exclude final overall parity)
+        y = ""
+        z = ""
+        i = 1
+        while i < len(n1):
+            y += n1[i-1]
+            z += l[i-1]
+            i *= 2
+
+        xy = "".join(str(int(y[k]) ^ int(z[k])) for k in range(len(y)))
+        syndrome = int(xy[::-1], 2) if xy else 0
+
+        overall = 0
+        for bit in n1:
+            overall ^= int(bit)
+
+        if syndrome == 0 and overall == 0:
+            return n1
+        if syndrome == 0 and overall == 1:
+            listapp = list(n1)
+            listapp[-1] = '1' if listapp[-1] == '0' else '0'
+            return "".join(listapp)
+        if syndrome != 0 and overall == 1:
+            listapp = list(n1)
+            if syndrome <= len(listapp):
+                listapp[syndrome-1] = '1' if listapp[syndrome-1] == '0' else '0'
+            return "".join(listapp)
+
+        # uncorrectable error detected
+        return n1
         
     def hamminization_not8(self,n1):
         long = len(n1)
         p = 0
         while (2**p < len(n1)+p+1):
             p+=1
+<<<<<<< HEAD
         trama = ['0'] * (long+p)
         print(f"HOLA1: {p}")
+=======
+
+        trama = ['0'] * (long+p+1)
+>>>>>>> c214fcf02fb11f4518a5f2a1a671d278c40627d7
         j = 0
-        for i in range (long+p):
-            if ((i & (i-1))!= 0):
-                trama[i-1] = n1[j]
-                j+=1
+        for i in range(long + p + 1):
+            if (((i + 1) & i) != 0):
+                trama[i] = n1[j]
+                j += 1
         for l in range(p):
             i = (2**l)
             sum = 0
-            for cont1 in range(long+p):
+            for cont1 in range(long+p+1):
                 preal = cont1 + 1
                 if(preal & i) != 0:
                     if preal != i:
                         sum = sum ^ int(trama[cont1])
             trama[i-1] = str(sum)
+<<<<<<< HEAD
         sum=0
         l = 0
         while l < len(trama):
@@ -324,6 +355,12 @@ class DecodeFixFileController(QWidget):
             trama.append("1") # Agrega el bit 1024 al final
         else:
             trama.append("0") # Agrega el bit 1024 al final
+=======
+        overall = 0
+        for cont1 in range(len(trama)-1):
+            overall ^= int(trama[cont1])
+        trama[-1] = str(overall)
+>>>>>>> c214fcf02fb11f4518a5f2a1a671d278c40627d7
 
         sol = "".join(trama)
         return sol

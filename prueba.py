@@ -8,10 +8,10 @@ def hamminization_not8(n1):
 
 	trama = ['0'] * (long+p)
 	j = 0
-	for i in range (long+p):
-		if ((i & (i-1))!= 0):
-			trama[i-1] = n1[j]
-			j+=1
+	for i in range(long+p):
+		if (((i + 1) & i) != 0):
+			trama[i] = n1[j]
+			j += 1
 	for l in range(p):
 		i = (2**l)
 		sum = 0

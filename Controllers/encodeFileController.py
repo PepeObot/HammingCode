@@ -103,6 +103,9 @@ class EncodeFileController(QWidget):
     def hamming_8(self):
         l = []
         self.fileSelect = self.obtenerArchivoSeleccionado()
+        if not self.fileSelect:
+            QMessageBox.warning(self, "Advertencia", "No se ha seleccionado ningún archivo.")
+            return
         baseFile = os.path.splitext(self.fileSelect)[0]  # Obtener el nombre del archivo, sin la extensión
         try:
             with open(os.path.join(self.carpetaArchivos,self.fileSelect),'rb')as archivo:
@@ -112,14 +115,13 @@ class EncodeFileController(QWidget):
                     l.append(f"{format(byte,'08b')}")
                     #print(f"{byte:3} - {format(byte, '08b')} - {caracter}") #format(byte, '08b') convierte el byte a su representación binaria de 8 bits completando con ceros a la izquierda si es necesario.
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
-            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA1"),'w') as f:
-                bloques = [self.hamminization8(b) for b in l]
-                f.write(" ".join(bloques))
-                # for b in l:
-                #     x = self.hamminization8(b)
-                #     f.write(x)
-                #     f.write(" ")
-            # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
+            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA1"), 'wb') as f:
+                for b in l:
+                    x = self.hamminization8(b)
+                    pb = int(x[0:8], 2)
+                    sb = int(x[8:16], 2)
+                    f.write(bytes([pb, sb]))
+            # with cierra el archivo automáticamente
             QMessageBox.information(self, "Éxito", f"Archivo protegido con Hamming (mod 8) correctamente. \nGuardado en '{baseFile}.HA1'.")
             self.refrescarPanel()
         except FileNotFoundError:
@@ -131,6 +133,9 @@ class EncodeFileController(QWidget):
         i = 0
         s_final1 = ""
         self.fileSelect = self.obtenerArchivoSeleccionado()
+        if not self.fileSelect:
+            QMessageBox.warning(self, "Advertencia", "No se ha seleccionado ningún archivo.")
+            return
         baseFile = os.path.splitext(self.fileSelect)[0]  # Obtener el nombre del archivo, sin la extensión
         try:
             with open(os.path.join(self.carpetaArchivos,self.fileSelect),'rb')as archivo:
@@ -159,7 +164,7 @@ class EncodeFileController(QWidget):
                     f.write(x)
                     f.write(" ")
             # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
-            QMessageBox.information(self, "Éxito", f"Archivo protegido con Hamming (mod 8) correctamente. \nGuardado en '{baseFile}.HA2'.")
+            QMessageBox.information(self, "Éxito", f"Archivo protegido con Hamming (mod 1024) correctamente. \nGuardado en '{baseFile}.HA2'.")
             self.refrescarPanel()
 
         except FileNotFoundError:
@@ -171,6 +176,9 @@ class EncodeFileController(QWidget):
         i = 0
         s_final = ""
         self.fileSelect = self.obtenerArchivoSeleccionado()
+        if not self.fileSelect:
+            QMessageBox.warning(self, "Advertencia", "No se ha seleccionado ningún archivo.")
+            return
         baseFile = os.path.splitext(self.fileSelect)[0]  # Obtener el nombre del archivo, sin la extensión
         try:
             with open(os.path.join(self.carpetaArchivos,self.fileSelect),'rb')as archivo:
@@ -198,7 +206,7 @@ class EncodeFileController(QWidget):
                     f.write(x)
                     f.write(" ")
             # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
-            QMessageBox.information(self, "Éxito", f"Archivo protegido con Hamming (mod 8) correctamente. \nGuardado en '{baseFile}.HA3'.")
+            QMessageBox.information(self, "Éxito", f"Archivo protegido con Hamming (mod 16384) correctamente. \nGuardado en '{baseFile}.HA3'.")
             self.refrescarPanel()
 
         except FileNotFoundError:
@@ -210,31 +218,31 @@ class EncodeFileController(QWidget):
         p = 0
         while (2**p < len(n1)+p+1):
             p+=1
+<<<<<<< HEAD
         trama = ['0'] * (long+p)
         print(f"HOLA2: {p}")
+=======
+        trama = ['0'] * (long+p+1)
+>>>>>>> c214fcf02fb11f4518a5f2a1a671d278c40627d7
         j = 0
-        for i in range (long+p):
-            if ((i & (i-1))!= 0):
-                trama[i-1] = n1[j]
-                j+=1
+        for i in range(long + p + 1):
+            if (((i + 1) & i) != 0):
+                trama[i] = n1[j]
+                j += 1
         for l in range(p):
             i = (2**l)
             sum = 0
-            for cont1 in range(long):
+            for cont1 in range(long + p + 1):
                 preal = cont1 + 1
                 if(preal & i) != 0:
                     if preal != i:
                         sum = sum ^ int(trama[cont1])
             trama[i-1] = str(sum)
-        sum=0
 
-        while l < len(trama):
-            sum += int(trama[l])
-            l+=1
-        if sum%2 == 0:
-            trama[len(trama)-1] = "1"
-        else:
-            trama[len(trama)-1] = "0"
+        sum = 0
+        for cont1 in range(len(trama)-1):
+            sum ^= int(trama[cont1])
+        trama[-1] = str(sum)
 
         sol = "".join(trama)
         return sol

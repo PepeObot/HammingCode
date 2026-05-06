@@ -9,13 +9,9 @@ class LoadFileController(QWidget):
         uic.loadUi("Ventanas/loadFilePanel.ui", self)
         self.mainWindow = main_window
 
-        # Acciones de los botones, los eventos
+        # --------- ACCIONES DE BOTONES Y EVENTOS ---------------------------------------------------------------------------------------------
         self.back_btn.clicked.connect(lambda: self.cambiarPanel(0))     # Cambia al panel de inicio, el indice 0 es el panel_inicio
-        
-        # Seleccionar archivo (Asegúrate que el nombre coincida con tu .ui)
         self.buscarFile_btn.clicked.connect(self.seleccionar_y_guardar)
-        # if hasattr(self, 'buscarFile_btn'):
-        #     self.buscarFile_btn.clicked.connect(self.seleccionar_y_guardar)
 
     def seleccionar_y_guardar(self):
         # Abrimos el buscador de archivos
