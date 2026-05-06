@@ -211,6 +211,7 @@ class EncodeFileController(QWidget):
         while (2**p < len(n1)+p+1):
             p+=1
         trama = ['0'] * (long+p)
+        print(f"HOLA2: {p}")
         j = 0
         for i in range (long+p):
             if ((i & (i-1))!= 0):

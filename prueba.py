@@ -158,6 +158,7 @@ def unhamming_not8(n1):
 			j+=1
 		else:
 			x += n1[i]
+	print(len(x))
 	l = hamminization_not8(x)
 	i=0
 	if (l != n1):
@@ -194,7 +195,7 @@ def unhamming_not8(n1):
 		
 		
 def sacarbits():
-	with open("Archivos/BTrad1024.txt","r") as f:
+	with open("Archivos/textoD.HE2","r") as f:
 		l2 = f.read()
 		l1 = ""
 		l=""
@@ -212,6 +213,9 @@ def sacarbits():
 			if(len(bloque)<i):
 				break
 			l1 += fromHtoHH(unhamming_not8(bloque))
+			with open("Archivos/TPX.txt","w") as g:
+				g.write(l1)
+				g.write(" ")
 			c+=i
 		for k in range(0, len(l1), 8):
 			btd = l1[k : k + 8]
@@ -310,8 +314,7 @@ def sacarbits8():
 #print(s_pre)
 
 #unhamming_not8(n1)
-#sacarbits()
-sacarbits8()
+sacarbits()
 
 
 

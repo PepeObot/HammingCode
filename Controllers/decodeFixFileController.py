@@ -205,13 +205,13 @@ class DecodeFixFileController(QWidget):
                 if l2[i] == " ":
                     break
                 i+=1
-            #i+=1
             l = l2.replace(" ","")
             s_final = ""
             while(c <= len(l)):
-                bloque = l[c:c+i]
+                bloque = l[c:c+i+1]
+                print(len(bloque))
                 if(len(bloque)<i):
-                    break
+                   break
                 l1 += self.sacarParidad(self.unhamming_not8(bloque)) 
                 c+=i
             for k in range(0, len(l1), 8):
@@ -266,7 +266,7 @@ class DecodeFixFileController(QWidget):
             y = ""
             z = ""
             j = 0
-            while i <= len(n1):
+            while i < len(n1):
                 if i-1 < len(l):
                     y += n1[i-1]
                     z += l[i-1]
@@ -277,16 +277,18 @@ class DecodeFixFileController(QWidget):
                 xy += str(int(y[i]) ^ int(z[i]))
             xy_r = xy[::-1]
             #print(xy_r)
-            if xy_r == 0 or (int(xy_r) & (int(xy_r) - 1)) == 0:
+            xy_r_int = int(xy_r, 2) # Convertimos a entero base 2 una sola vez
+            
+            # Verificamos si no hay error (0) o si el error es potencia de 2
+            if xy_r_int == 0 or (xy_r_int & (xy_r_int - 1)) == 0:
                 return l
-            xy_r = int(xy_r,2)
-            #print (xy_r)
+                
             listapp = list(n1)
-            if xy_r <= len(listapp):
-                if listapp[xy_r-1] == '0':
-                    listapp[xy_r-1] = '1'
+            if xy_r_int <= len(listapp):
+                if listapp[xy_r_int-1] == '0':
+                    listapp[xy_r_int-1] = '1'
                 else:
-                    listapp[xy_r-1] = '0'
+                    listapp[xy_r_int-1] = '0'
             sol = "".join(listapp)
             return sol
         else:
@@ -297,8 +299,8 @@ class DecodeFixFileController(QWidget):
         p = 0
         while (2**p < len(n1)+p+1):
             p+=1
-
         trama = ['0'] * (long+p)
+        print(f"HOLA1: {p}")
         j = 0
         for i in range (long+p):
             if ((i & (i-1))!= 0):
@@ -319,9 +321,9 @@ class DecodeFixFileController(QWidget):
             sum += int(trama[l])
             l+=1
         if sum%2 == 0:
-            trama[len(trama)-1] = "1"
+            trama.append("1") # Agrega el bit 1024 al final
         else:
-            trama[len(trama)-1] = "0"
+            trama.append("0") # Agrega el bit 1024 al final
 
         sol = "".join(trama)
         return sol
