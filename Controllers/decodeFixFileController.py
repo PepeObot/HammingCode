@@ -92,37 +92,32 @@ class DecodeFixFileController(QWidget):
             QMessageBox.critical(self, "Error", "No se ha podido leer el archivo seleccionado.")
 
     def sacarbitsSinCorregir(self, rutaFile):
-        with open(rutaFile, "r") as f:
-            l2 = f.read()
-            l1 = ""
-            l=""
-            i = 0
-            c=0
-            while i<len(l2):
-                if l2[i] == " ":
-                    break
-                i+=1
-            l = l2.replace(" ","")
-            s_final = ""
-            while c < len(l):
-                bloque = l[c:c+i]
-                if len(bloque) < i:
-                    break
-                l1 += self.sacarParidad(bloque)
-                c += i
-            for k in range(0, len(l1), 8):
-                btd = l1[k : k + 8]
-                if len(btd) == 8:
-                    if btd != "00000000":
-                        s_final += chr(int(btd, 2))
-        # match os.path.splitext(rutaFile)[1]:
-        #     case ".HA2" | ".HE2":
-        #         archivoFinal = os.path.splitext(rutaFile)[0] + ".DE2"
-        #     case ".HA3" | ".HE3":
-        #         archivoFinal = os.path.splitext(rutaFile)[0] + ".DE3"
-        # with open(archivoFinal,"w") as f:
-        #     f.write(s_final)
-        return s_final
+        ext = os.path.splitext(rutaFile)[1]
+        if ext in (".HA2", ".HE2"):
+            block_size = 1024
+        elif ext in (".HA3", ".HE3"):
+            block_size = 16384
+        else:
+            raise ValueError("Formato no soportado para este método.")
+
+        with open(rutaFile, "rb") as f:
+            raw = f.read()
+        bit_stream = "".join(f"{byte:08b}" for byte in raw)
+
+        l1 = ""
+        for c in range(0, len(bit_stream), block_size):
+            bloque = bit_stream[c:c+block_size]
+            if len(bloque) < block_size:
+                break
+            l1 += self.sacarParidad(bloque)
+
+        decoded = bytearray()
+        for k in range(0, len(l1), 8):
+            btd = l1[k : k + 8]
+            if len(btd) == 8 and btd != "00000000":
+                decoded.append(int(btd, 2))
+
+        return decoded.decode("latin-1", errors="replace")
     
     def sacarbitsSinCorregir8(self, rutaFile):
         with open(rutaFile, "rb") as f:
@@ -181,39 +176,39 @@ class DecodeFixFileController(QWidget):
         
     
     def sacarbitsCorregido(self, rutaFile):
-        with open(rutaFile, "r") as f:
-            l2 = f.read()
-            l1 = ""
-            l=""
-            i = 0
-            c=0
-            while i<len(l2):
-                if l2[i] == " ":
-                    break
-                i+=1
-            l = l2.replace(" ","")
-            s_final = ""
-            while(c <= len(l)):
-                bloque = l[c:c+i+1]
-                print(len(bloque))
-                if(len(bloque)<i):
-                   break
-                l1 += self.sacarParidad(self.unhamming_not8(bloque)) 
-                c+=i
-            for k in range(0, len(l1), 8):
-                btd = l1[k : k + 8]
-                if len(btd) == 8:
-                    if btd != "00000000":
-                        s_final += chr(int(btd, 2))
-        #ruta_trad = os.path.join(self.carpetaArchivos, "Trad.txt")
-        match os.path.splitext(rutaFile)[1]:
+        ext = os.path.splitext(rutaFile)[1]
+        if ext in (".HA2", ".HE2"):
+            block_size = 1024
+        elif ext in (".HA3", ".HE3"):
+            block_size = 16384
+        else:
+            raise ValueError("Formato no soportado para este método.")
+
+        with open(rutaFile, "rb") as f:
+            raw = f.read()
+        bit_stream = "".join(f"{byte:08b}" for byte in raw)
+
+        l1 = ""
+        for c in range(0, len(bit_stream), block_size):
+            bloque = bit_stream[c:c+block_size]
+            if len(bloque) < block_size:
+                break
+            l1 += self.sacarParidad(self.unhamming_not8(bloque))
+
+        decoded = bytearray()
+        for k in range(0, len(l1), 8):
+            btd = l1[k : k + 8]
+            if len(btd) == 8 and btd != "00000000":
+                decoded.append(int(btd, 2))
+
+        match ext:
             case ".HA2" | ".HE2":
                 archivoFinal = os.path.splitext(rutaFile)[0] + ".DC2"
             case ".HA3" | ".HE3":
                 archivoFinal = os.path.splitext(rutaFile)[0] + ".DC3"
-        with open(archivoFinal, "w") as f:
-            f.write(s_final)        # Aca se traba al deshamminizar con mod 8
-        return s_final
+        with open(archivoFinal, "wb") as f:
+            f.write(decoded)
+        return decoded.decode("latin-1", errors="replace")
     
     def sacarParidad(self, l):
         j=0
@@ -250,44 +245,8 @@ class DecodeFixFileController(QWidget):
             else:
                 x += n1[i]
         l = self.hamminization_not8(x)
-<<<<<<< HEAD
-        i=0
-        if (l != n1):
-            i = 1
-            y = ""
-            z = ""
-            j = 0
-            while i < len(n1):
-                if i-1 < len(l):
-                    y += n1[i-1]
-                    z += l[i-1]
-                j += 1
-                i = 2**j
-            xy = ""
-            for i in range(0,len(y)):
-                xy += str(int(y[i]) ^ int(z[i]))
-            xy_r = xy[::-1]
-            #print(xy_r)
-            xy_r_int = int(xy_r, 2) # Convertimos a entero base 2 una sola vez
-            
-            # Verificamos si no hay error (0) o si el error es potencia de 2
-            if xy_r_int == 0 or (xy_r_int & (xy_r_int - 1)) == 0:
-                return l
-                
-            listapp = list(n1)
-            if xy_r_int <= len(listapp):
-                if listapp[xy_r_int-1] == '0':
-                    listapp[xy_r_int-1] = '1'
-                else:
-                    listapp[xy_r_int-1] = '0'
-            sol = "".join(listapp)
-            return sol
-        else:
-=======
         if l == n1:
->>>>>>> c214fcf02fb11f4518a5f2a1a671d278c40627d7
             return n1
-
         # compute syndrome from regular parity positions (exclude final overall parity)
         y = ""
         z = ""
@@ -324,13 +283,8 @@ class DecodeFixFileController(QWidget):
         p = 0
         while (2**p < len(n1)+p+1):
             p+=1
-<<<<<<< HEAD
-        trama = ['0'] * (long+p)
-        print(f"HOLA1: {p}")
-=======
 
         trama = ['0'] * (long+p+1)
->>>>>>> c214fcf02fb11f4518a5f2a1a671d278c40627d7
         j = 0
         for i in range(long + p + 1):
             if (((i + 1) & i) != 0):
@@ -345,22 +299,10 @@ class DecodeFixFileController(QWidget):
                     if preal != i:
                         sum = sum ^ int(trama[cont1])
             trama[i-1] = str(sum)
-<<<<<<< HEAD
-        sum=0
-        l = 0
-        while l < len(trama):
-            sum += int(trama[l])
-            l+=1
-        if sum%2 == 0:
-            trama.append("1") # Agrega el bit 1024 al final
-        else:
-            trama.append("0") # Agrega el bit 1024 al final
-=======
         overall = 0
         for cont1 in range(len(trama)-1):
             overall ^= int(trama[cont1])
         trama[-1] = str(overall)
->>>>>>> c214fcf02fb11f4518a5f2a1a671d278c40627d7
 
         sol = "".join(trama)
         return sol

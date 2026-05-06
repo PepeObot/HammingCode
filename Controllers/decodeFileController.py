@@ -91,37 +91,39 @@ class DecodeFileController(QWidget):
     #def mostrarArchivoD (self):
 
     def sacarbitsSinCorregir(self, rutaFile):
-        with open(rutaFile, "r") as f:
-            l2 = f.read()
-            l1 = ""
-            l=""
-            i = 0
-            c=0
-            while i<len(l2):
-                if l2[i] == " ":
-                    break
-                i+=1
-            l = l2.replace(" ","")
-            s_final = ""
-            while c < len(l):
-                bloque = l[c:c+i]
-                if len(bloque) < i:
-                    break
-                l1 += self.sacarParidad(bloque)
-                c += i
-            for k in range(0, len(l1), 8):
-                btd = l1[k : k + 8]
-                if len(btd) == 8:
-                    if btd != "00000000":
-                        s_final += chr(int(btd, 2))
-        match os.path.splitext(rutaFile)[1]:
+        ext = os.path.splitext(rutaFile)[1]
+        if ext in (".HA2", ".HE2"):
+            block_size = 1024
+        elif ext in (".HA3", ".HE3"):
+            block_size = 16384
+        else:
+            raise ValueError("Formato no soportado para este método.")
+
+        with open(rutaFile, "rb") as f:
+            raw = f.read()
+        bit_stream = "".join(f"{byte:08b}" for byte in raw)
+
+        l1 = ""
+        for c in range(0, len(bit_stream), block_size):
+            bloque = bit_stream[c:c+block_size]
+            if len(bloque) < block_size:
+                break
+            l1 += self.sacarParidad(bloque)
+
+        decoded = bytearray()
+        for k in range(0, len(l1), 8):
+            btd = l1[k : k + 8]
+            if len(btd) == 8 and btd != "00000000":
+                decoded.append(int(btd, 2))
+
+        match ext:
             case ".HA2" | ".HE2":
                 archivoFinal = os.path.splitext(rutaFile)[0] + ".DE2"
             case ".HA3" | ".HE3":
                 archivoFinal = os.path.splitext(rutaFile)[0] + ".DE3"
-        with open(archivoFinal,"w") as f:
-            f.write(s_final)
-        return s_final
+        with open(archivoFinal, "wb") as f:
+            f.write(decoded)
+        return decoded.decode("latin-1", errors="replace")
 
     def sacarParidad(self, l):
         j=0

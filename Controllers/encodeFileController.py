@@ -158,12 +158,10 @@ class EncodeFileController(QWidget):
                 n += 1013 
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
 
-            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA2"),'w') as f:
+            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA2"),'wb') as f:
                 for b in l1:
                     x = self.hamminization_not8(b)
-                    f.write(x)
-                    f.write(" ")
-            # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
+                    f.write(bytearray(int(x[i:i+8], 2) for i in range(0, len(x), 8)))
             QMessageBox.information(self, "Éxito", f"Archivo protegido con Hamming (mod 1024) correctamente. \nGuardado en '{baseFile}.HA2'.")
             self.refrescarPanel()
 
@@ -200,12 +198,10 @@ class EncodeFileController(QWidget):
                 l1.append(s_pre)
                 n += 16369
             # archivo.close()   Lo comento xq puede causar errores ya que with lo cierra automaticamente
-            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA3"),'w') as f:
+            with open(os.path.join(self.carpetaArchivos, baseFile + ".HA3"),'wb') as f:
                 for b in l1:
                     x = self.hamminization_not8(b)
-                    f.write(x)
-                    f.write(" ")
-            # f.close()    Lo comento xq puede causar errores ya que with lo cierra automaticamente
+                    f.write(bytearray(int(x[i:i+8], 2) for i in range(0, len(x), 8)))
             QMessageBox.information(self, "Éxito", f"Archivo protegido con Hamming (mod 16384) correctamente. \nGuardado en '{baseFile}.HA3'.")
             self.refrescarPanel()
 
@@ -218,12 +214,7 @@ class EncodeFileController(QWidget):
         p = 0
         while (2**p < len(n1)+p+1):
             p+=1
-<<<<<<< HEAD
-        trama = ['0'] * (long+p)
-        print(f"HOLA2: {p}")
-=======
         trama = ['0'] * (long+p+1)
->>>>>>> c214fcf02fb11f4518a5f2a1a671d278c40627d7
         j = 0
         for i in range(long + p + 1):
             if (((i + 1) & i) != 0):
